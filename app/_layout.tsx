@@ -1,9 +1,5 @@
-import { Stack } from "expo-router";
+import Recorder from "../components/Recorder";
 
 export default function RootLayout() {
-  return (
-    <Stack>
-      <Stack.Screen name="index" />
-    </Stack>
-  );
+  return <Recorder />;
 }
