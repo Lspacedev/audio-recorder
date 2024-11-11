@@ -15,15 +15,18 @@ import * as FileSystem from 'expo-file-system';
 import { useState, useEffect } from "react";
 import { Audio } from "expo-av";
 import Button from "./Button";
+
+import * as MediaLibrary from 'expo-media-library';
+
 export default function Recorder() {
   const [recording, setRecording] = useState();
   const [recordings, setRecordings] = useState([]);
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const [recordingStatus, setRecordingStatus] = useState('idle');
-  
-  // useEffect(()=>{
-  //   console.log(recordings)
-  // },[recordings])
+  const [permResponse, requestPerm] = MediaLibrary.usePermissions();
+  useEffect(()=>{
+    getAllRecordings();
+  },[])
   
   async function startRecording() {
     try {
@@ -57,14 +60,14 @@ export default function Recorder() {
     });
     const uri = recording.getURI();
 
-    let allRecordings = [...recordings];
-    const {sound, status} = await recording.createNewLoadedSoundAsync();
+  //   let allRecordings = [...recordings];
+  //   const {sound, status} = await recording.createNewLoadedSoundAsync();
    
-   allRecordings.push({
-    sound: sound,
-    duration: status.durationMillis,
-    file: uri
-   })
+  //  allRecordings.push({
+  //   sound: sound,
+  //   duration: status.durationMillis,
+  //   file: uri
+  //  })
     //const fileName = `recording-${Date.now()}.m4a`;
     //console.log(recording)
     
@@ -77,7 +80,24 @@ export default function Recorder() {
     // await playbackObject.loadAsync({ uri: FileSystem.documentDirectory + 'recordings/' + `${fileName}` });
     // await playbackObject.playAsync();
 
-    setRecordings(allRecordings);
+
+    if (permResponse.status !== 'granted') {
+      await requestPerm();
+    }
+    try {
+      const asset = await MediaLibrary.createAssetAsync(uri);
+      const album = await MediaLibrary.getAlbumAsync('Audio Recorder');
+      //console.log(asset, album)
+      if (album == null) {
+        await MediaLibrary.createAlbumAsync('Audio Recorder', asset, false);
+      } else {
+        await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+      }
+      getAllRecordings();
+
+    } catch (e) {
+      handleError(e);
+    }
 
     console.log("Recording stopped and stored at", uri);
   }
@@ -86,19 +106,38 @@ export default function Recorder() {
       return (
         <View key={i} styles={styles.recordingContainer}>
           <Text style={styles.recordingTitle}>
-            Recording #{i + 1} | {record.duration}
+            {record.filename} | {record.duration}
           </Text>
-          <Button title="Delere" onPress={() => deleteRecording(record.file)} />
+          <Button title="Delete" onPress={() => deleteRecording(record.id, record.albumId)} />
 
-          <Button title="Play" onPress={() => record.sound.replayAsync()} />
+          <Button title="Play" onPress={() => playSound(record.uri)} />
 
         </View>
       );
     });
   }
-  const deleteRecording = (file) => {
-    let filteredRecordings = recordings.filter((record)=> record.file !== file);
-    setRecordings(filteredRecordings);
+  const playSound = async(uri) => {
+     const playbackObject = new Audio.Sound();
+    await playbackObject.loadAsync({ uri: uri});
+    await playbackObject.playAsync();
+  }
+  const deleteRecording = async (assetId, albumId) => {
+    await MediaLibrary.removeAssetsFromAlbumAsync(assetId, albumId);
+    getAllRecordings();
+  }
+
+  const getAllRecordings = async() => {
+      let album = await MediaLibrary.getAlbumAsync("Audio Recorder")
+      if(album !== null){
+        const media = await MediaLibrary.getAssetsAsync({
+          album: album,
+          mediaType: MediaLibrary.MediaType.audio,
+          first: 40
+      });
+      setRecordings(media.assets);
+    }else {
+      setRecordings([]);
+    }
   }
   return (
     <SafeAreaView style={styles.container}>
