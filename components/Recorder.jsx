@@ -15,10 +15,9 @@ import * as FileSystem from "expo-file-system";
 import { useState, useEffect, useRef } from "react";
 import { Audio } from "expo-av";
 import Button from "./Button";
-import SearchBar from "./SearchBar";
 import { router } from "expo-router";
-
-//import * as MediaLibrary from "expo-media-library";
+import Feather from "@expo/vector-icons/Feather";
+import * as MediaLibrary from "expo-media-library";
 
 export default function Recorder() {
   const [recording, setRecording] = useState();
@@ -26,7 +25,7 @@ export default function Recorder() {
   const [recordingStatus, setRecordingStatus] = useState("idle");
 
   const [permissionResponse, requestPermission] = Audio.usePermissions();
-  // const [permResponse, requestPerm] = MediaLibrary.usePermissions();
+  const [permResponse, requestPerm] = MediaLibrary.usePermissions();
 
   async function startRecording() {
     try {
@@ -63,19 +62,19 @@ export default function Recorder() {
     if (permResponse.status !== "granted") {
       await requestPerm();
     }
-    // try {
-    //   const asset = await MediaLibrary.createAssetAsync(uri);
-    //   const album = await MediaLibrary.getAlbumAsync("Audio Recorder");
-    //   //console.log(asset, album)
-    //   if (album == null) {
-    //     await MediaLibrary.createAlbumAsync("Audio Recorder", asset, false);
-    //   } else {
-    //     await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-    //   }
-    //   getAllRecordings();
-    // } catch (e) {
-    //   handleError(e);
-    // }
+    try {
+      const asset = await MediaLibrary.createAssetAsync(uri);
+      const album = await MediaLibrary.getAlbumAsync("Audio Recorder");
+      //console.log(asset, album)
+      if (album == null) {
+        await MediaLibrary.createAlbumAsync("Audio Recorder", asset, false);
+      } else {
+        await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+      }
+      //getAllRecordings();
+    } catch (e) {
+      handleError(e);
+    }
 
     console.log("Recording stopped and stored at", uri);
   }
@@ -86,6 +85,9 @@ export default function Recorder() {
         <Text style={styles.title}>Audio Recorder</Text>
 
         <View style={styles.buttons}>
+          <Pressable onPress={() => router.push("Recordings")}>
+            <Feather name="settings" size={24} color="#C7D6D5" />
+          </Pressable>
           <View style={styles.recordingBtn}>
             <Button
               title={recording ? "Stop" : "Start"}
@@ -93,7 +95,7 @@ export default function Recorder() {
             />
           </View>
           <Pressable onPress={() => router.push("Recordings")}>
-            <Text style={styles.navText}>Recordings</Text>
+            <Feather name="list" size={24} color="#C7D6D5" />
           </Pressable>
         </View>
       </ScrollView>
@@ -129,6 +131,11 @@ const styles = StyleSheet.create({
   },
   recordingTitle: {
     color: "white",
+  },
+  buttons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
   },
   recordingBtn: {
     width: 50,

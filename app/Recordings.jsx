@@ -2,12 +2,17 @@ import { StyleSheet, View, Text, Pressable } from "react-native";
 import React from "react";
 import { useState, useEffect, useRef } from "react";
 import { Audio } from "expo-av";
-//import * as MediaLibrary from "expo-media-library";
+import * as MediaLibrary from "expo-media-library";
+import Button from "../components/Button";
+import SearchBar from "../components/SearchBar";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { router } from "expo-router";
 
 const Recordings = () => {
   const [recordings, setRecordings] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [playing, setPlaying] = useState(false);
   const sound = useRef(new Audio.Sound());
 
   useEffect(() => {
@@ -15,15 +20,14 @@ const Recordings = () => {
   }, []);
   useEffect(() => {
     if (searchText.length > 0) {
-      const filteredRecordings = recordings.filter(
-        (recording) =>
-          recording.filename.toLowerCase() === searchText.toLowerCase()
+      const filteredRecordings = recordings.filter((recording) =>
+        recording.filename.match(searchText)
       );
       if (filteredRecordings.length > 0) {
         setSearchResults(filteredRecordings);
       }
     }
-  }, []);
+  }, [searchText]);
   const playRecordings = (array) => {
     return array.map((record, i) => {
       return (
@@ -36,60 +40,78 @@ const Recordings = () => {
             onPress={() => deleteRecording(record.id, record.albumId)}
           />
 
-          <Button title="Play" onPress={() => playSound(record.uri)} />
-          <Button title="Pause" onPress={() => pauseSound()} />
+          {playing ? (
+            <Button title="Pause" onPress={() => pauseSound()} />
+          ) : (
+            <Button title="Play" onPress={() => playSound(record.uri)} />
+          )}
         </View>
       );
     });
   };
   const playSound = async (uri) => {
-    // const playbackObject = new Audio.Sound();
-    // await playbackObject.loadAsync({ uri: uri });
-    // await playbackObject.playAsync();
-    // await sound.current.loadAsync({ uri: uri });
-    // try {
-    //   const result = await sound.current.getStatusAsync();
-    //   if (result.isLoaded) {
-    //     if (result.isPlaying === false) {
-    //       await sound.current.playAsync();
-    //     }
-    //   }
-    // } catch (error) {
-    //   console.log(error);
-    // }
+    try {
+      const result = await sound.current.getStatusAsync();
+      if (result.isLoaded === false) {
+        await sound.current.loadAsync({ uri: uri });
+      }
+
+      if (result.isPlaying === false) {
+        await sound.current.playAsync();
+        setPlaying(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
   const deleteRecording = async (assetId, albumId) => {
-    // await MediaLibrary.removeAssetsFromAlbumAsync(assetId, albumId);
-    // getAllRecordings();
+    try {
+      await MediaLibrary.removeAssetsFromAlbumAsync(assetId, albumId);
+      getAllRecordings();
+    } catch (error) {
+      console.log(error);
+    }
   };
   const pauseSound = async () => {
-    // try {
-    //   const result = await sound.current.getStatusAsync();
-    //   if (result.isLoaded) {
-    //     if (result.isPlaying === true) {
-    //       sound.current.pauseAsync();
-    //     }
-    //   }
-    // } catch (error) {
-    //   console.log(error);
-    // }
+    try {
+      const result = await sound.current.getStatusAsync();
+      if (result.isLoaded) {
+        if (result.isPlaying === true) {
+          await sound.current.pauseAsync();
+          setPlaying(false);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const getAllRecordings = async () => {
-    // let album = await MediaLibrary.getAlbumAsync("Audio Recorder");
-    // if (album !== null) {
-    //   const media = await MediaLibrary.getAssetsAsync({
-    //     album: album,
-    //     mediaType: MediaLibrary.MediaType.audio,
-    //     first: 40,
-    //   });
-    //   setRecordings(media.assets);
-    // } else {
-    //   setRecordings([]);
-    // }
+    let album = await MediaLibrary.getAlbumAsync("Audio Recorder");
+    if (album !== null) {
+      const media = await MediaLibrary.getAssetsAsync({
+        album: album,
+        mediaType: MediaLibrary.MediaType.audio,
+        first: 40,
+      });
+      setRecordings(media.assets);
+    } else {
+      setRecordings([]);
+    }
   };
   return (
     <View style={styles.container}>
+      <View style={styles.recordingsNav}>
+        <Pressable
+          onPress={() => router.push("./", { relativeToDirectory: true })}
+        >
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </Pressable>
+
+        <Text style={styles.recordingsTitle}>Recordings</Text>
+        <SearchBar name="Find" onChange={setSearchText} />
+      </View>
+
       {searchResults.length > 0 ? (
         playRecordings(searchResults)
       ) : recordings.length > 0 ? (
@@ -105,10 +127,52 @@ export default Recordings;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0C0910",
+    backgroundColor: "whitesmoke",
   },
-  text: {
+  recordingsNav: {
+    backgroundColor: "#0C0910",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 15,
+    padding: 25,
+  },
+  recordingsTitle: {
+    color: "white",
+    fontSize: 20,
+  },
+  scrollView: {
+    flex: 1,
+    justifyContent: "space-between",
+    paddingVertical: 100,
+  },
+  title: {
     color: "#C7D6D5",
     textAlign: "center",
+    fontSize: 22,
+  },
+  recordingContainer: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+    backgroundColor: "#333138",
+    margin: 15,
+    padding: 5,
+    paddingHorizontal: 15,
+    borderRadius: 30,
+  },
+  recordingTitle: {
+    color: "white",
+  },
+  recordingBtn: {
+    width: 50,
+    height: 50,
+    borderRadius: 150,
+    alignSelf: "center",
+    justifyContent: "center",
+    alignContent: "center",
+    backgroundColor: "whitesmoke",
+  },
+  navText: {
+    color: "#C7D6D5",
   },
 });

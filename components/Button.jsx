@@ -1,6 +1,8 @@
 import { StyleSheet, Text, Pressable } from "react-native";
 import React from "react";
-
+import Entypo from "@expo/vector-icons/Entypo";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 const Button = ({ title, onPress }) => {
   return (
     <Pressable
@@ -13,7 +15,19 @@ const Button = ({ title, onPress }) => {
       ]}
       onPress={onPress}
     >
-      {(title === "Play" || title === "Delete") && <Text>{title}</Text>}
+      {(title === "Play" || title === "Pause" || title === "Delete") && (
+        <Text>
+          {title === "Play" ? (
+            <Entypo name="controller-play" size={24} color="black" />
+          ) : title === "Pause" ? (
+            <FontAwesome name="pause" size={24} color="black" />
+          ) : title === "Delete" ? (
+            <MaterialIcons name="delete" size={24} color="black" />
+          ) : (
+            { title }
+          )}
+        </Text>
+      )}
     </Pressable>
   );
 };
@@ -39,8 +53,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#eb4034",
   },
   stop: {
-    height: 25,
-    width: 25,
+    height: 20,
+    width: 20,
     justifyContent: "center",
     alignSelf: "center",
     backgroundColor: "#bbb",
