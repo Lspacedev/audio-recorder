@@ -1,10 +1,19 @@
-import { StyleSheet, View, Text, Pressable } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Modal,
+  Alert,
+} from "react-native";
 import React from "react";
 import { useState, useEffect, useRef } from "react";
 import { Audio } from "expo-av";
 import * as MediaLibrary from "expo-media-library";
 import Button from "../components/Button";
 import SearchBar from "../components/SearchBar";
+import useAsyncStorage from "../hooks/useAsyncStorage";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 
@@ -13,10 +22,18 @@ const Recordings = () => {
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [playing, setPlaying] = useState(false);
+  const [updatedRecs, setUpdatedRecs] = useAsyncStorage("names", []);
+  const [openForm, setOpenForm] = useState(false);
+  const [name, setName] = useState("");
+
   const sound = useRef(new Audio.Sound());
 
   useEffect(() => {
+    console.log(updatedRecs);
     getAllRecordings();
+  }, []);
+  useEffect(() => {
+    updateRecordingNames();
   }, []);
   useEffect(() => {
     if (searchText.length > 0) {
@@ -32,6 +49,28 @@ const Recordings = () => {
     return array.map((record, i) => {
       return (
         <View key={i} style={styles.recordingContainer}>
+          <Modal
+            style={styles.modal}
+            animationType="slide"
+            transparent={true}
+            visible={openForm}
+            // onRequestClose={() => {
+            //   Alert.alert("Modal has been closed.");
+            //   setModalVisible(!modalVisible);
+            // }}
+          >
+            <TextInput
+              style={styles.rename}
+              placeholder="Enter new name"
+              placeholderTextColor={"#717171"}
+              onChangeText={(text) => setName(text)}
+            />
+            <Button
+              title="Submit"
+              onPress={() => renameFile(record.id, name)}
+            />
+          </Modal>
+
           <Text style={styles.recordingTitle}>
             {record.filename.slice(0, 20) + "..."} | {record.duration}
           </Text>
@@ -45,6 +84,7 @@ const Recordings = () => {
           ) : (
             <Button title="Play" onPress={() => playSound(record.uri)} />
           )}
+          <Button title="Rename" onPress={() => setOpenForm(true)} />
         </View>
       );
     });
@@ -97,6 +137,32 @@ const Recordings = () => {
       setRecordings(media.assets);
     } else {
       setRecordings([]);
+    }
+  };
+  console.log(updatedRecs);
+  const renameFile = (id, newName) => {
+    const filteredFiles = updatedRecs.filter((file) => file.id === id);
+    if (filteredFiles.length === 0) {
+      setUpdatedRecs((prev) => [...prev, { id, name: newName }]);
+    } else {
+      const filesCopy = [...updatedRecs];
+      let file = filesCopy.find((file) => file.id === id);
+      file.name = newName;
+      setUpdatedRecs(filesCopy);
+    }
+  };
+  const updateRecordingNames = () => {
+    if (updatedRecs.length > 0) {
+      const recordingsCopy = [...recordings];
+      for (let i = 0; i < updatedRecs.length; i++) {
+        for (let k = 0; k < recordingsCopy.length; k++) {
+          if (recordingsCopy[k].id === updatedRecs[i]) {
+            recordingsCopy[k].filename = updatedRecs[i].name;
+          }
+        }
+      }
+
+      setRecordings(recordingsCopy);
     }
   };
   return (
@@ -174,5 +240,16 @@ const styles = StyleSheet.create({
   },
   navText: {
     color: "#C7D6D5",
+  },
+  modal: {
+    felx: 1,
+    backgroundColor: "blue",
+  },
+  rename: {
+    borderRadius: 5,
+    borderColor: "black",
+    paddingHorizontal: 70,
+    color: "black",
+    borderWidth: 0.8,
   },
 });
