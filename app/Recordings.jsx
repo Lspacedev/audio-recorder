@@ -13,28 +13,53 @@ import { Audio } from "expo-av";
 import * as MediaLibrary from "expo-media-library";
 import Button from "../components/Button";
 import SearchBar from "../components/SearchBar";
+import Rename from "../components/Rename";
 import useAsyncStorage from "../hooks/useAsyncStorage";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Recordings = () => {
   const [recordings, setRecordings] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [playing, setPlaying] = useState(false);
-  const [updatedRecs, setUpdatedRecs] = useAsyncStorage("names", []);
+  const [updatedRecs, setUpdatedRecs] = useState([]);
   const [openForm, setOpenForm] = useState(false);
   const [name, setName] = useState("");
 
   const sound = useRef(new Audio.Sound());
 
+  const storeData = async (key, value) => {
+    try {
+      await AsyncStorage.setItem(key, value);
+    } catch (e) {
+      // saving error
+    }
+  };
+  const getData = async () => {
+    try {
+      const data = await AsyncStorage.getItem("updates");
+
+      if (data !== null) {
+        setUpdatedRecs(JSON.parse(data));
+        return data;
+      }
+    } catch (error) {
+      console.error("Error fetching data", error);
+    }
+  };
   useEffect(() => {
-    console.log(updatedRecs);
+    getData();
+  }, []);
+  useEffect(() => {
     getAllRecordings();
   }, []);
+
   useEffect(() => {
-    updateRecordingNames();
-  }, []);
+    storeData("updates", JSON.stringify(updatedRecs));
+  }, [updatedRecs]);
+
   useEffect(() => {
     if (searchText.length > 0) {
       const filteredRecordings = recordings.filter((recording) =>
@@ -54,20 +79,13 @@ const Recordings = () => {
             animationType="slide"
             transparent={true}
             visible={openForm}
-            // onRequestClose={() => {
-            //   Alert.alert("Modal has been closed.");
-            //   setModalVisible(!modalVisible);
-            // }}
           >
-            <TextInput
-              style={styles.rename}
-              placeholder="Enter new name"
-              placeholderTextColor={"#717171"}
-              onChangeText={(text) => setName(text)}
-            />
-            <Button
-              title="Submit"
-              onPress={() => renameFile(record.id, name)}
+            <Rename
+              setName={setName}
+              name={name}
+              closeForm={setOpenForm}
+              renameFile={renameFile}
+              id={record.id}
             />
           </Modal>
 
@@ -134,12 +152,13 @@ const Recordings = () => {
         mediaType: MediaLibrary.MediaType.audio,
         first: 40,
       });
-      setRecordings(media.assets);
+      const data = await getData();
+      updateRecordingNames(JSON.parse(data), media.assets);
+      // setRecordings(media.assets);
     } else {
       setRecordings([]);
     }
   };
-  console.log(updatedRecs);
   const renameFile = (id, newName) => {
     const filteredFiles = updatedRecs.filter((file) => file.id === id);
     if (filteredFiles.length === 0) {
@@ -150,21 +169,26 @@ const Recordings = () => {
       file.name = newName;
       setUpdatedRecs(filesCopy);
     }
+    updateRecordingNames(updatedRecs, recordings);
+
+    setOpenForm(false);
   };
-  const updateRecordingNames = () => {
-    if (updatedRecs.length > 0) {
-      const recordingsCopy = [...recordings];
-      for (let i = 0; i < updatedRecs.length; i++) {
+  const updateRecordingNames = (arr, recordingsArr) => {
+    if (arr.length > 0) {
+      const recordingsCopy = [...recordingsArr];
+      for (let i = 0; i < arr.length; i++) {
         for (let k = 0; k < recordingsCopy.length; k++) {
-          if (recordingsCopy[k].id === updatedRecs[i]) {
-            recordingsCopy[k].filename = updatedRecs[i].name;
+          if (recordingsCopy[k].id === arr[i].id) {
+            recordingsCopy[k].filename = arr[i].name;
           }
         }
       }
-
       setRecordings(recordingsCopy);
+    } else {
+      setRecordings(recordingsArr);
     }
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.recordingsNav}>
