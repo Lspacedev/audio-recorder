@@ -18,6 +18,7 @@ import useAsyncStorage from "../hooks/useAsyncStorage";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Slider from "@react-native-community/slider";
 
 const Recordings = () => {
   const [recordings, setRecordings] = useState([]);
@@ -27,6 +28,11 @@ const Recordings = () => {
   const [updatedRecs, setUpdatedRecs] = useState([]);
   const [openForm, setOpenForm] = useState(false);
   const [name, setName] = useState("");
+  const [curr, setCurr] = useState("");
+  const [sliderValue, setSliderValue] = useState(0);
+  const [maxVal, setMaxVal] = useState(0);
+  const [minVal, setMinVal] = useState(0);
+  const [pos, setPos] = useState(0);
 
   const sound = useRef(new Audio.Sound());
 
@@ -59,7 +65,40 @@ const Recordings = () => {
   useEffect(() => {
     storeData("updates", JSON.stringify(updatedRecs));
   }, [updatedRecs]);
+  useEffect(() => {
+    console.log({ sliderValue });
 
+    if (sliderValue > 0) {
+      console.log({ sliderValue });
+      sound.current.playFromPositionAsync(sliderValue);
+      //setPos(sliderValue);
+    }
+  }, [sliderValue]);
+
+  useEffect(() => {
+    if (playing === true) {
+      sound.current.setOnPlaybackStatusUpdate(async (status) => {
+        console.log(status.positionMillis / status.durationMillis);
+        if (status.positionMillis > status.durationMillis * 0.9) {
+          console.log("Done playing");
+          await sound.current.unloadAsync();
+          setPlaying(false);
+          setSliderValue(0);
+          setMaxVal(0);
+          setMinVal(0);
+          setCurr("");
+        } else {
+          console.log("adding");
+          // setSliderValrue((prev) => prev + 0.5);
+        }
+
+        setPos(status.positionMillis / status.durationMillis);
+        //   // sound.current.playFromPositionAsync(sliderValue);
+        // }
+      });
+      //sound.current.playFromPositionAsync(sliderValue);
+    }
+  }, [playing]);
   useEffect(() => {
     if (searchText.length > 0) {
       const filteredRecordings = recordings.filter((recording) =>
@@ -73,41 +112,70 @@ const Recordings = () => {
   const playRecordings = (array) => {
     return array.map((record, i) => {
       return (
-        <View key={i} style={styles.recordingContainer}>
-          <Modal
-            style={styles.modal}
-            animationType="slide"
-            transparent={true}
-            visible={openForm}
-          >
-            <Rename
-              setName={setName}
-              name={name}
-              closeForm={setOpenForm}
-              renameFile={renameFile}
-              id={record.id}
-            />
-          </Modal>
-
-          <Text style={styles.recordingTitle}>
-            {record.filename.slice(0, 20) + "..."} | {record.duration}
-          </Text>
-          <Button
-            title="Delete"
-            onPress={() => deleteRecording(record.id, record.albumId)}
-          />
-
-          {playing ? (
-            <Button title="Pause" onPress={() => pauseSound()} />
-          ) : (
-            <Button title="Play" onPress={() => playSound(record.uri)} />
+        <View key={i}>
+          {playing && curr === record.uri && (
+            <>
+              <Text>{sliderValue}</Text>
+              <Slider
+                style={{ width: 200, height: 40 }}
+                minimumValue={minVal}
+                maximumValue={1}
+                value={pos}
+                onValueChange={(value) => setSliderValue(value)}
+              />
+            </>
           )}
-          <Button title="Rename" onPress={() => setOpenForm(true)} />
+
+          <View key={i} style={styles.recordingContainer}>
+            <Modal
+              style={styles.modal}
+              animationType="slide"
+              transparent={true}
+              visible={openForm}
+            >
+              <Rename
+                setName={setName}
+                name={name}
+                closeForm={setOpenForm}
+                renameFile={renameFile}
+                id={record.id}
+              />
+            </Modal>
+
+            <View style={styles.recordingTitle}>
+              <Text>
+                {record.filename.length > 20
+                  ? record.filename.slice(0, 15) + "..."
+                  : record.filename}{" "}
+              </Text>
+              <Text>{formatDuration(record.duration)}</Text>
+            </View>
+            <View style={styles.recordBtns}>
+              <Button
+                title="Delete"
+                onPress={() => deleteRecording(record.id, record.albumId)}
+              />
+
+              {!playing ? (
+                <Button
+                  title="Play"
+                  onPress={() => playSound(record.uri, record.duration)}
+                />
+              ) : curr === record.uri ? (
+                <Button title="Pause" onPress={() => pauseSound()} />
+              ) : (
+                <Button title="Play" onPress={() => playSound()} />
+              )}
+              <Button title="Rename" onPress={() => setOpenForm(true)} />
+            </View>
+          </View>
         </View>
       );
     });
   };
-  const playSound = async (uri) => {
+  const playSound = async (uri, duration) => {
+    //console.log(maxVal, sliderValue);
+
     try {
       const result = await sound.current.getStatusAsync();
       if (result.isLoaded === false) {
@@ -117,6 +185,8 @@ const Recordings = () => {
       if (result.isPlaying === false) {
         await sound.current.playAsync();
         setPlaying(true);
+        setCurr(uri);
+        setMaxVal(duration);
       }
     } catch (error) {
       console.log(error);
@@ -143,7 +213,13 @@ const Recordings = () => {
       console.log(error);
     }
   };
-
+  const formatDuration = (duration) => {
+    const minutes = duration / 60;
+    const seconds = Math.round((minutes - Math.floor(minutes)) * 60);
+    return seconds < 10
+      ? `${Math.floor(minutes)}:0${seconds}`
+      : `${Math.floor(minutes)}:${seconds}`;
+  };
   const getAllRecordings = async () => {
     let album = await MediaLibrary.getAlbumAsync("Audio Recorder");
     if (album !== null) {
@@ -153,6 +229,7 @@ const Recordings = () => {
         first: 40,
       });
       const data = await getData();
+      console.log(media.assets[0]);
       updateRecordingNames(JSON.parse(data), media.assets);
       // setRecordings(media.assets);
     } else {
@@ -229,6 +306,7 @@ const styles = StyleSheet.create({
   recordingsTitle: {
     color: "white",
     fontSize: 20,
+    flexDirection: "row",
   },
   scrollView: {
     flex: 1,
@@ -242,16 +320,18 @@ const styles = StyleSheet.create({
   },
   recordingContainer: {
     flexDirection: "row",
-    justifyContent: "space-evenly",
     alignItems: "center",
-    backgroundColor: "#333138",
-    margin: 15,
-    padding: 5,
+    justifyContent: "space-between",
+
+    padding: 15,
     paddingHorizontal: 15,
     borderRadius: 30,
+    borderBottomWidth: 1,
+    borderBottomColor: "lightgrey",
   },
   recordingTitle: {
-    color: "white",
+    color: "black",
+    flex: 1,
   },
   recordingBtn: {
     width: 50,
@@ -275,5 +355,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 70,
     color: "black",
     borderWidth: 0.8,
+  },
+  recordBtns: {
+    flex: 1,
+    flexDirection: "row",
   },
 });

@@ -126,7 +126,7 @@ export default function Recorder() {
         </View>
         <Text style={styles.title}>
           {minutes < 10 ? "0" + minutes : minutes} :
-          {seconds < 10 ? "0" + seconds : seconds}
+          {seconds < 10 ? " 0" + seconds : seconds}
         </Text>
 
         <View style={styles.buttons}>
