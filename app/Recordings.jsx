@@ -93,8 +93,6 @@ const Recordings = () => {
         }
 
         setPos(status.positionMillis / status.durationMillis);
-        //   // sound.current.playFromPositionAsync(sliderValue);
-        // }
       });
       //sound.current.playFromPositionAsync(sliderValue);
     }
