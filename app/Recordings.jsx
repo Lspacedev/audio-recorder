@@ -67,19 +67,19 @@ const Recordings = () => {
   }, [updatedRecs]);
   useEffect(() => {
     console.log({ sliderValue });
-
+    (async()=>{
     if (sliderValue > 0) {
       console.log({ sliderValue });
-      sound.current.playFromPositionAsync(sliderValue);
-      //setPos(sliderValue);
-    }
+     await sound.current.playFromPositionAsync(sliderValue);
+    setPos(sliderValue);
+  }})()
   }, [sliderValue]);
 
   useEffect(() => {
     if (playing === true) {
       sound.current.setOnPlaybackStatusUpdate(async (status) => {
-        console.log(status.positionMillis / status.durationMillis);
-        if (status.positionMillis > status.durationMillis * 0.9) {
+        console.log({pos: status.positionMillis / status.durationMillis});
+        if (status.positionMillis > status.durationMillis * 0.95) {
           console.log("Done playing");
           await sound.current.unloadAsync();
           setPlaying(false);
@@ -91,7 +91,7 @@ const Recordings = () => {
           console.log("adding");
           // setSliderValrue((prev) => prev + 0.5);
         }
-
+        
         setPos(status.positionMillis / status.durationMillis);
       });
       //sound.current.playFromPositionAsync(sliderValue);
