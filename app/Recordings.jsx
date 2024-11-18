@@ -14,7 +14,6 @@ import * as MediaLibrary from "expo-media-library";
 import Button from "../components/Button";
 import SearchBar from "../components/SearchBar";
 import Rename from "../components/Rename";
-import useAsyncStorage from "../hooks/useAsyncStorage";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -29,10 +28,10 @@ const Recordings = () => {
   const [openForm, setOpenForm] = useState(false);
   const [name, setName] = useState("");
   const [curr, setCurr] = useState("");
-  const [sliderValue, setSliderValue] = useState(0);
-  const [maxVal, setMaxVal] = useState(0);
-  const [minVal, setMinVal] = useState(0);
+
   const [pos, setPos] = useState(0);
+  const [soundStatus, setSoundStatus] = useState({});
+  const [dur, setDur] = useState(0);
 
   const sound = useRef(new Audio.Sound());
 
@@ -65,36 +64,21 @@ const Recordings = () => {
   useEffect(() => {
     storeData("updates", JSON.stringify(updatedRecs));
   }, [updatedRecs]);
-  useEffect(() => {
-    console.log({ sliderValue });
-    (async()=>{
-    if (sliderValue > 0) {
-      console.log({ sliderValue });
-     await sound.current.playFromPositionAsync(sliderValue);
-    setPos(sliderValue);
-  }})()
-  }, [sliderValue]);
 
   useEffect(() => {
     if (playing === true) {
       sound.current.setOnPlaybackStatusUpdate(async (status) => {
-        console.log({pos: status.positionMillis / status.durationMillis});
-        if (status.positionMillis > status.durationMillis * 0.95) {
+        if (status.didJustFinish) {
           console.log("Done playing");
           await sound.current.unloadAsync();
           setPlaying(false);
-          setSliderValue(0);
-          setMaxVal(0);
-          setMinVal(0);
+
           setCurr("");
         } else {
-          console.log("adding");
-          // setSliderValrue((prev) => prev + 0.5);
+          const position = status.positionMillis / status.durationMillis;
+          setPos(position);
         }
-        
-        setPos(status.positionMillis / status.durationMillis);
       });
-      //sound.current.playFromPositionAsync(sliderValue);
     }
   }, [playing]);
   useEffect(() => {
@@ -111,19 +95,6 @@ const Recordings = () => {
     return array.map((record, i) => {
       return (
         <View key={i}>
-          {playing && curr === record.uri && (
-            <>
-              <Text>{sliderValue}</Text>
-              <Slider
-                style={{ width: 200, height: 40 }}
-                minimumValue={minVal}
-                maximumValue={1}
-                value={pos}
-                onValueChange={(value) => setSliderValue(value)}
-              />
-            </>
-          )}
-
           <View key={i} style={styles.recordingContainer}>
             <Modal
               style={styles.modal}
@@ -167,13 +138,44 @@ const Recordings = () => {
               <Button title="Rename" onPress={() => setOpenForm(true)} />
             </View>
           </View>
+
+          {curr === record.uri && (
+            <Slider
+              style={{ width: "100%", height: 50 }}
+              minimumValue={0}
+              maximumValue={1}
+              value={pos}
+              onChange={(value) => setPos(value)}
+              onSlidingStart={async (value) => {
+                if (!playing) return;
+                try {
+                  await sound.current.pauseAsync();
+                  setPlaying(false);
+                } catch (error) {
+                  console.log("err on slide");
+                }
+              }}
+              onSlidingComplete={async (value) => {
+                if (soundStatus === null) return;
+
+                try {
+                  const status = await sound.current.setPositionAsync(
+                    Math.floor(dur * value)
+                  );
+                  setSoundStatus(status);
+                  await sound.current.playAsync();
+                  setPlaying(true);
+                } catch (error) {
+                  console.log("slide err", error);
+                }
+              }}
+            />
+          )}
         </View>
       );
     });
   };
   const playSound = async (uri, duration) => {
-    //console.log(maxVal, sliderValue);
-
     try {
       const result = await sound.current.getStatusAsync();
       if (result.isLoaded === false) {
@@ -184,7 +186,7 @@ const Recordings = () => {
         await sound.current.playAsync();
         setPlaying(true);
         setCurr(uri);
-        setMaxVal(duration);
+        setDur(duration * 1000);
       }
     } catch (error) {
       console.log(error);
@@ -227,9 +229,7 @@ const Recordings = () => {
         first: 40,
       });
       const data = await getData();
-      console.log(media.assets[0]);
       updateRecordingNames(JSON.parse(data), media.assets);
-      // setRecordings(media.assets);
     } else {
       setRecordings([]);
     }

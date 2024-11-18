@@ -99,7 +99,6 @@ export default function Recorder() {
       allowsRecordingIOS: false,
     });
     const uri = recording.getURI();
-
     if (permResponse.status !== "granted") {
       await requestPerm();
     }
@@ -139,7 +138,14 @@ export default function Recorder() {
               onPress={recording ? stopRecording : startRecording}
             />
           </View>
-          <Pressable onPress={() => router.push("Recordings")}>
+          <Pressable
+            onPress={async () => {
+              if (permResponse.status !== "granted") {
+                await requestPerm();
+              }
+              router.push("Recordings");
+            }}
+          >
             <Feather name="list" size={24} color="#C7D6D5" />
           </Pressable>
         </View>
