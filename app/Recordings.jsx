@@ -54,6 +54,7 @@ const Recordings = () => {
       console.error("Error fetching data", error);
     }
   };
+
   useEffect(() => {
     getData();
   }, []);
@@ -74,6 +75,7 @@ const Recordings = () => {
           setPlaying(false);
 
           setCurr("");
+          setPos(0);
         } else {
           const position = status.positionMillis / status.durationMillis;
           setPos(position);
@@ -357,5 +359,9 @@ const styles = StyleSheet.create({
   recordBtns: {
     flex: 1,
     flexDirection: "row",
+  },
+  text: {
+    textAlign: "center",
+    margin: 20,
   },
 });
