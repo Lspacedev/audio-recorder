@@ -18,10 +18,10 @@ import { StatusBar } from "expo-status-bar";
 import * as NavigationBar from "expo-navigation-bar";
 import { useState, useEffect } from "react";
 import CustomInput from "@/components/CustomInput";
-import { validateInput } from "../../utils/input-validation";
+import { validateInput } from "../utils/input-validation";
 import { RadioButton, RadioGroup } from "@/components/RadioButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 
 export default function Registration() {
   const [firstName, setFirstName] = useState("");
@@ -38,9 +38,8 @@ export default function Registration() {
   const [postalCode, setPostalCode] = useState("");
   const [errors, setErrors] = useState([]);
   const [selectedGenderValue, setSelectedGenderValue] = useState("");
-  useEffect(() => {
-    console.log(firstName);
-  }, [firstName]);
+  const params = useLocalSearchParams();
+
   useEffect(() => {
     NavigationBar.setBackgroundColorAsync("#020709");
     NavigationBar.setBorderColorAsync("#717171");

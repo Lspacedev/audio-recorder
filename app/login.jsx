@@ -17,7 +17,7 @@ import { TextInput } from "react-native-web";
 import * as NavigationBar from "expo-navigation-bar";
 import { useState, useEffect, Component } from "react";
 import CustomInput from "@/components/CustomInput";
-import { validateInput } from "../../utils/input-validation";
+import { validateInput } from "../utils/input-validation";
 import { Link } from "expo-router";
 export default class Login extends Component {
   constructor() {
@@ -140,7 +140,10 @@ export default class Login extends Component {
             <Text style={styles.buttonText}>Submit</Text>
           </Pressable>
           <View style={styles.signInSection}>
-            <Link href="/register" style={{ color: "#BDBDBD" }}>
+            <Link
+              href={{ pathname: "/register", params: { from: "login" } }}
+              style={{ color: "#BDBDBD" }}
+            >
               Don't have an account?
             </Link>
             <Pressable
