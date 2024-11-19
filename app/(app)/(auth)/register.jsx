@@ -18,7 +18,7 @@ import { StatusBar } from "expo-status-bar";
 import * as NavigationBar from "expo-navigation-bar";
 import { useState, useEffect } from "react";
 import CustomInput from "@/components/CustomInput";
-import { validateInput } from "../utils/input-validation";
+import { validateInput } from "../../../utils/input-validation";
 import { RadioButton, RadioGroup } from "@/components/RadioButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useLocalSearchParams } from "expo-router";

@@ -1,34 +1,11 @@
-import Recorder from "../components/Recorder";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Slot } from "expo-router";
+import { SessionProvider } from "../ctx";
 
-import { Drawer } from "expo-router/drawer";
-export default function RootLayout() {
+export default function Root() {
+  // Set up the auth context and render our layout inside of it.
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Drawer
-        screenOptions={{
-          drawerStyle: {
-            backgroundColor: "#010709",
-          },
-          drawerActiveBackgroundColor: "#306A68",
-          drawerInactiveBackgroundColor: "#010709",
-          drawerActiveTintColor: "white",
-          drawerInactiveTintColor: "grey",
-        }}
-      >
-        <Drawer.Screen
-          name="login"
-          options={{
-            drawerLabel: "Login",
-          }}
-        />
-        <Drawer.Screen
-          name="register"
-          options={{
-            drawerLabel: "Register",
-          }}
-        />
-      </Drawer>
-    </GestureHandlerRootView>
+    <SessionProvider>
+      <Slot />
+    </SessionProvider>
   );
 }
