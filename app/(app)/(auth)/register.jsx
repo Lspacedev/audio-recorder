@@ -19,53 +19,22 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useState, useEffect } from "react";
 import CustomInput from "@/components/CustomInput";
 import { validateInput } from "../../../utils/input-validation";
-import { RadioButton, RadioGroup } from "@/components/RadioButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useLocalSearchParams } from "expo-router";
 
 export default function Registration() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [gender, setGender] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [userName, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [houseNumber, setHouseNumber] = useState("");
-  const [streetName, setStreetName] = useState("");
-  const [city, setCity] = useState("");
-  const [province, setProvince] = useState("");
-  const [postalCode, setPostalCode] = useState("");
+
   const [errors, setErrors] = useState([]);
-  const [selectedGenderValue, setSelectedGenderValue] = useState("");
   const params = useLocalSearchParams();
 
   useEffect(() => {
     NavigationBar.setBackgroundColorAsync("#020709");
     NavigationBar.setBorderColorAsync("#717171");
   }, []);
-  const handleOnPress = () => {
-    Alert.alert("Alert", "Button was pressed", [
-      {
-        text: "Okay",
-        onPress: () => console.log("Okay was pressed"),
-      },
-      {
-        text: "Cancel",
-        style: "cancel",
-        onPress: () => console.log("Cancel was pressed"),
-      },
-      {
-        text: "Delete",
-        style: "destructive",
 
-        onPress: () => console.log("Delete was pressed"),
-      },
-    ]);
-  };
-  const handleOnLongPress = () => {
-    ToastAndroid.show("Button was long pressed...", 3000);
-  };
   const handleInput = (type, stateName, value) => {
     setErrors((errors) => ({
       ...errors,
@@ -73,52 +42,34 @@ export default function Registration() {
     }));
   };
   const handleOnSubmit = async () => {
-    await AsyncStorage.setItem(
-      "reg",
-      JSON.stringify({ firstName, password, phoneNumber })
-    );
+    let data = JSON.parse(await AsyncStorage.getItem("reg"));
+    if (data === null) {
+      let arr = [];
+      arr.push({ userName, password });
+      await AsyncStorage.setItem("reg", JSON.stringify(arr));
+    } else {
+      const user = data.filter((account) => account.userName === data.userName);
+
+      if (user.length > 0) {
+        return "Account exists";
+      } else {
+        data.push({ userName, password });
+        await AsyncStorage.setItem("reg", JSON.stringify(data));
+      }
+    }
   };
-  const handleOnGetData = async () => {
-    const data = JSON.parse(await AsyncStorage.getItem("reg"));
-    console.log(data);
-  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <Text style={styles.formTitle}>Register</Text>
         <CustomInput
-          name={"First Name"}
-          onChange={setFirstName}
-          onBlur={() => handleInput("string", "firstName", firstName)}
-          error={errors?.firstName?.error}
+          name={"Username"}
+          onChange={setUsername}
+          onBlur={() => handleInput("string", "userName", userName)}
+          error={errors?.userName?.error}
         />
-        <CustomInput
-          name={"Last Name"}
-          onChange={setLastName}
-          onBlur={() => handleInput("string", "lastName", lastName)}
-          error={errors?.lastName?.error}
-        />
-        <RadioGroup
-          groupName={"Gender"}
-          selectedValue={selectedGenderValue}
-          setSelectedValue={setSelectedGenderValue}
-        >
-          <RadioButton label={"Male"} value={"Male"} />
-          <RadioButton label={"Female"} value={"Female"} />
-        </RadioGroup>
 
-        <CustomInput
-          name={"Phone Number"}
-          onChange={setPhoneNumber}
-          onBlur={() => handleInput("number", "phoneNumber", phoneNumber)}
-          error={errors?.phoneNumber?.error}
-        />
-        <CustomInput
-          name={"Email"}
-          onChange={setEmail}
-          onBlur={() => handleInput("email", "email", email)}
-          error={errors?.email?.error}
-        />
         <CustomInput
           name={"Password"}
           onChange={setPassword}
@@ -133,57 +84,16 @@ export default function Registration() {
           }
           error={errors?.confirmPassword?.error}
         />
-        <CustomInput
-          name={"House Number"}
-          onChange={setHouseNumber}
-          onBlur={() => handleInput("number", "houseNumber", houseNumber)}
-          error={errors?.houseNumber?.error}
-        />
-        <CustomInput
-          name={"Street Name"}
-          onChange={setStreetName}
-          onBlur={() => handleInput("string", "streetName", streetName)}
-          error={errors?.streetName?.error}
-        />
-        <CustomInput
-          name={"City"}
-          onChange={setCity}
-          onBlur={() => handleInput("string", "city", city)}
-          error={errors?.city?.error}
-        />
-
-        <CustomInput
-          name={"Province"}
-          onChange={setProvince}
-          onBlur={() => handleInput("string", "province", province)}
-          error={errors?.province?.error}
-        />
-        <CustomInput
-          name={"Postal Code"}
-          onChange={setPostalCode}
-          onBlur={() => handleInput("number", "postalCode", postalCode)}
-          error={errors?.postalCode?.error}
-        />
 
         <View style={styles.signInSection}>
-          <Text style={{ color: "#BDBDBD" }}>Already have an account?</Text>
-          <Pressable
-          // onPress={() => {
-          //   handleShowAlert();
-          // }}
-          >
-            <Link href="/login" style={{ color: "#306A68", padding: 5 }}>
+          <Text style={{ color: "#F7F0F0" }}>Already have an account?</Text>
+          <Pressable>
+            <Link href="/sign-in" style={{ color: "#F7F0F0", padding: 5 }}>
               Sign In
             </Link>
           </Pressable>
         </View>
-        <Pressable
-          onPress={() => {
-            handleOnGetData();
-          }}
-        >
-          <Text style={{ color: "#306A68", padding: 5 }}>Get data</Text>
-        </Pressable>
+
         <Pressable
           style={styles.button}
           onPress={() => {
@@ -195,14 +105,14 @@ export default function Registration() {
       </ScrollView>
       {/* </KeyboardAvoidingView> */}
 
-      <StatusBar backgroundColor="#010709" />
+      <StatusBar backgroundColor="#0C0910" />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#010709",
+    backgroundColor: "#0C0910",
     flex: 1,
     paddingHorizontal: 20,
   },
@@ -213,30 +123,30 @@ const styles = StyleSheet.create({
   formTitle: {
     fontSize: 36,
     marginVertical: 10,
-    color: "#BDBDBD",
+    color: "#F7F0F0",
   },
   inputContainer: {
     gap: 5,
   },
   label: {
-    color: "#BDBDBD",
+    color: "#F7F0F0",
   },
   input: {
     borderRadius: 5,
-    borderColor: "#BDBDBD",
+    borderColor: "#F7F0F0",
     padding: 5,
     paddingHorizontal: 10,
-    color: "#BDBDBD",
+    color: "#F7F0F0",
     borderWidth: 0.8,
   },
   button: {
-    backgroundColor: "#306A68",
+    backgroundColor: "#F7F0F0",
     padding: 15,
     marginTop: 20,
     borderRadius: 5,
   },
   buttonText: {
-    color: "#BDBDBD",
+    color: "#010709",
     textAlign: "center",
     textTransform: "uppercase",
   },

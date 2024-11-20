@@ -8,9 +8,7 @@ export default function AppLayout() {
   const pathname = usePathname();
   const authRoutes = ["/sign-in", "/register"];
   const { session, isLoading } = useSession();
-  useEffect(() => {
-    console.log(pathname, session);
-  }, [pathname]);
+
   if (isLoading) {
     return <Text>Loading...</Text>;
   }
@@ -22,5 +20,10 @@ export default function AppLayout() {
     return <Redirect href={{ pathname: "/home" }} />;
   }
 
-  return <Stack />;
+  return (
+    <Stack>
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      <Stack.Screen name="(home)" options={{ headerShown: false }} />
+    </Stack>
+  );
 }

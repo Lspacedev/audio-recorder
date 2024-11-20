@@ -2,7 +2,6 @@ import { StyleSheet, Text, TextInput, View } from "react-native";
 import React from "react";
 
 const CustomInput = ({ name, onChange, error, onBlur }) => {
-  console.log(error);
   return (
     <View style={styles.inputContainer}>
       <Text style={styles.label}>{name}</Text>

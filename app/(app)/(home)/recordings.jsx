@@ -11,9 +11,9 @@ import React from "react";
 import { useState, useEffect, useRef } from "react";
 import { Audio } from "expo-av";
 import * as MediaLibrary from "expo-media-library";
-import Button from "./Button";
-import SearchBar from "./SearchBar";
-import Rename from "./Rename";
+import Button from "@/components/Button";
+import SearchBar from "@/components/SearchBar";
+import Rename from "@/components/Rename";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -266,6 +266,8 @@ const Recordings = () => {
     }
   };
 
+  const backupAudio = async () => {};
+
   return (
     <View style={styles.container}>
       <View style={styles.recordingsNav}>
@@ -301,7 +303,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 15,
-    padding: 25,
+    padding: 5,
+    paddingVertical: 25,
   },
   recordingsTitle: {
     color: "white",

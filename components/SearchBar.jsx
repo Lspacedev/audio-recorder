@@ -16,14 +16,12 @@ const SearchBar = ({ name, onChange }) => {
 
 export default SearchBar;
 const styles = StyleSheet.create({
-  inputContainer: {
-    gap: 5,
-  },
+  inputContainer: {},
 
   input: {
     borderRadius: 5,
     borderColor: "#BDBDBD",
-    paddingHorizontal: 70,
+
     color: "#BDBDBD",
     borderWidth: 0.8,
   },

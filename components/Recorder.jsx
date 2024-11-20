@@ -143,7 +143,7 @@ export default function Recorder() {
               if (permResponse.status !== "granted") {
                 await requestPerm();
               }
-              router.push("Recordings");
+              router.push("recordings");
             }}
           >
             <Feather name="list" size={24} color="#C7D6D5" />
