@@ -45,7 +45,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       value={{
         signIn: async (username, password) => {
           let data = await getData("reg");
-
+          console.log(data)
           // Perform sign-in logic here
           type Obj = {
             userName: string;

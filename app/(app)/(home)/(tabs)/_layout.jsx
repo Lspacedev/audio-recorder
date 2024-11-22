@@ -16,6 +16,8 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen name="home" options={{ headerShown: false }} />
+      {/* <Tabs.Screen name="recordings" options={{ headerShown: false }} /> */}
+
       <Tabs.Screen
         name="profile"
         options={{

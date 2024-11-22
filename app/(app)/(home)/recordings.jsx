@@ -18,6 +18,12 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Slider from "@react-native-community/slider";
+import signIn from "@/config/google";
+import {
+  GDrive,
+  MimeTypes
+} from "@robinbobin/react-native-google-drive-api-wrapper";
+import RNFS from "react-native-fs"
 
 const Recordings = () => {
   const [recordings, setRecordings] = useState([]);
@@ -138,6 +144,8 @@ const Recordings = () => {
                 <Button title="Play" onPress={() => playSound()} />
               )}
               <Button title="Rename" onPress={() => setOpenForm(true)} />
+              <Button title="Backup" onPress={() => backupAudio(record)} />
+
             </View>
           </View>
 
@@ -266,8 +274,23 @@ const Recordings = () => {
     }
   };
 
-  const backupAudio = async () => {
-   
+  const backupAudio = async (record) => {
+    const res = await signIn();
+
+    const gdrive = new GDrive();
+    gdrive.accessToken = (await res.getTokens()).accessToken;
+    RNFS.readFile(record.uri, "base64").then(async (data) => {
+      // binary data
+      const id = (await gdrive.files.newMultipartUploader()
+      .setData(data, MimeTypes.BINARY)
+      .setRequestBody({
+        name: "multipart_bin"
+      })
+      .execute()
+    ).id;
+    });
+    
+ 
   };
 
   return (
