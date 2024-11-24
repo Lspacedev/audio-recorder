@@ -18,12 +18,12 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Slider from "@react-native-community/slider";
-import signIn from "@/config/google";
+import { configureGoogleSignIn, signIn } from "@/config/google";
 import {
   GDrive,
-  MimeTypes
+  MimeTypes,
 } from "@robinbobin/react-native-google-drive-api-wrapper";
-import RNFS from "react-native-fs"
+import RNFS from "react-native-fs";
 
 const Recordings = () => {
   const [recordings, setRecordings] = useState([]);
@@ -62,6 +62,7 @@ const Recordings = () => {
   };
 
   useEffect(() => {
+    configureGoogleSignIn();
     getData();
   }, []);
   useEffect(() => {
@@ -145,7 +146,6 @@ const Recordings = () => {
               )}
               <Button title="Rename" onPress={() => setOpenForm(true)} />
               <Button title="Backup" onPress={() => backupAudio(record)} />
-
             </View>
           </View>
 
@@ -275,22 +275,31 @@ const Recordings = () => {
   };
 
   const backupAudio = async (record) => {
-    const res = await signIn();
+    try {
+      const res = await signIn();
+      const gdrive = new GDrive();
+      gdrive.accessToken = res;
+      gdrive.fetchTimeout = 30000;
+      console.log(record.uri);
 
-    const gdrive = new GDrive();
-    gdrive.accessToken = (await res.getTokens()).accessToken;
-    RNFS.readFile(record.uri, "base64").then(async (data) => {
-      // binary data
-      const id = (await gdrive.files.newMultipartUploader()
-      .setData(data, MimeTypes.BINARY)
-      .setRequestBody({
-        name: "multipart_bin"
-      })
-      .execute()
-    ).id;
-    });
-    
- 
+      RNFS.readFile(record.uri, "base64").then(async (data) => {
+        // binary data
+        const id = (
+          await gdrive.files
+            .newMultipartUploader()
+            .setIsBase64(true)
+            .setData(data, "audio/mp4")
+            .setRequestBody({
+              name: record.filename,
+            })
+            .execute()
+        ).id;
+        Alert.alert("Backup success");
+      });
+    } catch (error) {
+      console.log(error);
+      Alert.alert("An error occured while backing up");
+    }
   };
 
   return (

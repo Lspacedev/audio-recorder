@@ -3,7 +3,6 @@ import React from "react";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-
 const Button = ({ title, onPress }) => {
   return (
     <Pressable style={styles.parent} onPress={onPress}>
@@ -12,14 +11,15 @@ const Button = ({ title, onPress }) => {
           title === "Start"
             ? styles.start
             : title === "Stop"
-            ? styles.stop
-            : styles.default,
+              ? styles.stop
+              : styles.default,
         ]}
       >
         {(title === "Play" ||
           title === "Pause" ||
           title === "Delete" ||
-          title === "Rename") && (
+          title === "Rename" ||
+          title === "Backup") && (
           <Text>
             {title === "Play" ? (
               <Entypo
@@ -41,6 +41,8 @@ const Button = ({ title, onPress }) => {
                 size={24}
                 color="black"
               />
+            ) : title === "Backup" ? (
+              <MaterialIcons name="backup" size={24} color="black" />
             ) : (
               { title }
             )}
