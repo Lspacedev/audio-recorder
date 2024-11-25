@@ -30,6 +30,8 @@ const Recordings = () => {
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [playing, setPlaying] = useState(false);
+  const [paused, setPaused] = useState(false);
+
   const [updatedRecs, setUpdatedRecs] = useState([]);
   const [openForm, setOpenForm] = useState(false);
   const [name, setName] = useState("");
@@ -142,7 +144,10 @@ const Recordings = () => {
               ) : curr === record.uri ? (
                 <Button title="Pause" onPress={() => pauseSound()} />
               ) : (
-                <Button title="Play" onPress={() => playSound()} />
+                <Button
+                  title="Play"
+                  onPress={() => playSound(record.uri, record.duration)}
+                />
               )}
               <Button title="Rename" onPress={() => setOpenForm(true)} />
               <Button title="Backup" onPress={() => backupAudio(record)} />
@@ -280,7 +285,6 @@ const Recordings = () => {
       const gdrive = new GDrive();
       gdrive.accessToken = res;
       gdrive.fetchTimeout = 30000;
-      console.log(record.uri);
 
       RNFS.readFile(record.uri, "base64").then(async (data) => {
         // binary data
@@ -361,10 +365,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
 
     padding: 15,
-    paddingHorizontal: 15,
-    borderRadius: 30,
-    borderBottomWidth: 1,
-    borderBottomColor: "lightgrey",
+    paddingHorizontal: 5,
   },
   recordingTitle: {
     color: "black",
@@ -394,8 +395,9 @@ const styles = StyleSheet.create({
     borderWidth: 0.8,
   },
   recordBtns: {
-    flex: 1,
+    flex: 2,
     flexDirection: "row",
+    gap: 2,
   },
   text: {
     textAlign: "center",
