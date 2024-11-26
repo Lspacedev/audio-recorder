@@ -6,6 +6,7 @@ import {
   Pressable,
   Modal,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import React from "react";
 import { useState, useEffect, useRef } from "react";
@@ -42,7 +43,25 @@ const Recordings = () => {
   const [dur, setDur] = useState(0);
 
   const sound = useRef(new Audio.Sound());
+  const lastTapTimeRef = useRef(null);
 
+  const handleTap = () => {
+    const now = new Date().getTime();
+    const DOUBLE_TAP_DELAY = 300; // Adjust as needed for your use case (in milliseconds)
+
+    if (now - lastTapTimeRef.current < DOUBLE_TAP_DELAY) {
+      // Double tap detected
+      console.log("Double tap!");
+      // Perform 'like' action here
+    } else {
+      // Single tap detected
+      console.log("Single tap!");
+      // Toggle play/pause video
+      setPlaying(!playing);
+    }
+
+    lastTapTimeRef.current = now;
+  };
   const storeData = async (key, value) => {
     try {
       await AsyncStorage.setItem(key, value);
@@ -165,12 +184,13 @@ const Recordings = () => {
 
           {curr === record.uri && (
             <Slider
-              style={{ width: "100%", height: 50 }}
+              style={{ width: "100%", margin: 0 }}
               minimumValue={0}
               maximumValue={1}
               value={pos}
               onChange={(value) => setPos(value)}
               onSlidingStart={async (value) => {
+                console.log({ value });
                 if (!playing) return;
                 try {
                   await sound.current.pauseAsync();
@@ -180,6 +200,7 @@ const Recordings = () => {
                 }
               }}
               onSlidingComplete={async (value) => {
+                console.log("end");
                 if (soundStatus === null) return;
 
                 try {
@@ -415,5 +436,9 @@ const styles = StyleSheet.create({
   text: {
     textAlign: "center",
     margin: 20,
+  },
+  touch: {
+    padding: 0,
+    backgroundColor: "red",
   },
 });

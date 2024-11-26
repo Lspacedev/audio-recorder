@@ -10,8 +10,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import * as NavigationBar from "expo-navigation-bar";
-import * as FileSystem from "expo-file-system";
 import { useState, useEffect, useRef } from "react";
 import { Audio } from "expo-av";
 import Button from "./Button";
@@ -129,7 +127,11 @@ export default function Recorder() {
         </Text>
 
         <View style={styles.buttons}>
-          <Pressable onPress={() => setRecordingStatus("stopped")}>
+          <Pressable
+            onPress={() => {
+              router.push("settings");
+            }}
+          >
             <Feather name="settings" size={24} color="#C7D6D5" />
           </Pressable>
           <View style={styles.recordingBtn}>
