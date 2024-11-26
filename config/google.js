@@ -18,7 +18,6 @@ export const signIn = async () => {
     await GoogleSignin.hasPlayServices();
     const response = await GoogleSignin.signIn();
     const token = (await GoogleSignin.getTokens()).accessToken;
-    console.log(token);
     return token;
   } catch (error) {
     switch (error.code) {

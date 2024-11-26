@@ -131,11 +131,20 @@ const Recordings = () => {
               <Text>{formatDuration(record.duration)}</Text>
             </View>
             <View style={styles.recordBtns}>
+              {/* <Text>{JSON.stringify(playing)}</Text> */}
+
               <Button
                 title="Delete"
                 onPress={() => deleteRecording(record.id, record.albumId)}
               />
-
+              {/* {playing && curr === record.uri ? (
+                <Button title="Pause" onPress={() => pauseSound()} />
+              ) : (
+                <Button
+                  title="Play"
+                  onPress={() => playSound(record.uri, record.duration)}
+                />
+              )} */}
               {!playing ? (
                 <Button
                   title="Play"
@@ -194,14 +203,18 @@ const Recordings = () => {
     try {
       const result = await sound.current.getStatusAsync();
       if (result.isLoaded === false) {
-        await sound.current.loadAsync({ uri: uri });
-      }
-
-      if (result.isPlaying === false) {
-        await sound.current.playAsync();
         setPlaying(true);
         setCurr(uri);
         setDur(duration * 1000);
+        await sound.current.loadAsync({ uri: uri });
+        await sound.current.playAsync();
+      }
+
+      if (result.isPlaying === false) {
+        setPlaying(true);
+        setCurr(uri);
+        setDur(duration * 1000);
+        await sound.current.playAsync();
       }
     } catch (error) {
       console.log(error);
