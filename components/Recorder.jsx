@@ -10,8 +10,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import * as NavigationBar from "expo-navigation-bar";
-import * as FileSystem from "expo-file-system";
 import { useState, useEffect, useRef } from "react";
 import { Audio } from "expo-av";
 import Button from "./Button";

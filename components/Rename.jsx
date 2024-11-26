@@ -1,17 +1,4 @@
-import {
-  ScrollView,
-  FlatList,
-  View,
-  Text,
-  TextInput,
-  Image,
-  ActivityIndicator,
-  Pressable,
-  Alert,
-  ToastAndroid,
-  KeyboardAvoidingView,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 
 export default function Rename({ setName, name, closeForm, renameFile, id }) {
   return (
@@ -26,15 +13,14 @@ export default function Rename({ setName, name, closeForm, renameFile, id }) {
           <Text style={styles.close}>x</Text>
         </Pressable>
 
-        <Text style={styles.formTitle}>Enter new name</Text>
         <TextInput
-          style={styles.rename}
+          style={styles.input}
           placeholder="Enter new name"
           placeholderTextColor={"#717171"}
           onChangeText={(text) => setName(text)}
         />
 
-        <Pressable onPress={() => renameFile(id, name)}>
+        <Pressable style={styles.button} onPress={() => renameFile(id, name)}>
           <Text style={styles.buttonText}>Submit</Text>
         </Pressable>
       </View>
@@ -46,17 +32,14 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#010709",
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 5,
+    width: 350,
   },
   scrollView: {
     gap: 15,
     paddingVertical: 20,
   },
-  formTitle: {
-    fontSize: 22,
-    marginVertical: 10,
-    color: "#BDBDBD",
-  },
+
   inputContainer: {
     gap: 5,
   },
@@ -67,19 +50,20 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderColor: "#BDBDBD",
     padding: 5,
-    paddingHorizontal: 10,
+    width: "100%",
     color: "#BDBDBD",
     borderWidth: 0.8,
   },
   button: {
-    backgroundColor: "#ECEBE4",
+    backgroundColor: "#0C0910",
     padding: 5,
     paddingHorizontal: 50,
-    marginTop: 20,
+    width: "100%",
+    marginTop: 10,
     borderRadius: 5,
   },
   buttonText: {
-    color: "#BDBDBD",
+    color: "#C7D6D5",
     textAlign: "center",
     textTransform: "uppercase",
   },
@@ -90,11 +74,9 @@ const styles = StyleSheet.create({
   },
   modal: {
     flex: 1,
-
     backgroundColor: "rgba(0, 0, 0, 0.5)",
-
     padding: 25,
-    alignItems: "center",
+    justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -105,9 +87,9 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   form: {
-    margin: 20,
+    margin: 25,
     backgroundColor: "white",
-    padding: 25,
+    padding: 20,
     borderRadius: 20,
     alignItems: "center",
   },

@@ -6,6 +6,7 @@ import {
   Pressable,
   Modal,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import React from "react";
 import { useState, useEffect, useRef } from "react";
@@ -40,6 +41,9 @@ const Recordings = () => {
   const [pos, setPos] = useState(0);
   const [soundStatus, setSoundStatus] = useState({});
   const [dur, setDur] = useState(0);
+
+  const [loading, setLoading] = useState(false);
+  const [modalId, setModalId] = useState("");
 
   const sound = useRef(new Audio.Sound());
 
@@ -111,7 +115,7 @@ const Recordings = () => {
               style={styles.modal}
               animationType="slide"
               transparent={true}
-              visible={openForm}
+              visible={openForm && modalId === record.id}
             >
               <Rename
                 setName={setName}
@@ -158,7 +162,13 @@ const Recordings = () => {
                   onPress={() => playSound(record.uri, record.duration)}
                 />
               )}
-              <Button title="Rename" onPress={() => setOpenForm(true)} />
+              <Button
+                title="Rename"
+                onPress={() => {
+                  setModalId(record.id);
+                  setOpenForm(true);
+                }}
+              />
               <Button title="Backup" onPress={() => backupAudio(record)} />
             </View>
           </View>
@@ -286,6 +296,7 @@ const Recordings = () => {
           }
         }
       }
+
       setRecordings(recordingsCopy);
     } else {
       setRecordings(recordingsArr);
@@ -294,6 +305,7 @@ const Recordings = () => {
 
   const backupAudio = async (record) => {
     try {
+      setLoading(true);
       const res = await signIn();
       const gdrive = new GDrive();
       gdrive.accessToken = res;
@@ -311,14 +323,19 @@ const Recordings = () => {
             })
             .execute()
         ).id;
-        Alert.alert("Backup success");
+        if (id !== "") {
+          setLoading(false);
+
+          Alert.alert(`Record has been successfully backed up.`);
+        }
       });
     } catch (error) {
+      setLoading(false);
+
       console.log(error);
       Alert.alert("An error occured while backing up");
     }
   };
-
   return (
     <View style={styles.container}>
       <View style={styles.recordingsNav}>
@@ -331,13 +348,22 @@ const Recordings = () => {
         <Text style={styles.recordingsTitle}>Recordings</Text>
         <SearchBar name="Find" onChange={setSearchText} />
       </View>
-
-      {searchResults.length > 0 ? (
-        playRecordings(searchResults)
-      ) : recordings.length > 0 ? (
-        playRecordings(recordings)
+      {loading ? (
+        <View
+          style={{ flex: 1, alignContent: "center", justifyContent: "center" }}
+        >
+          <ActivityIndicator size="500" color="#0000ff" />
+        </View>
       ) : (
-        <Text style={styles.text}>No recordings</Text>
+        <View>
+          {searchResults.length > 0 ? (
+            playRecordings(searchResults)
+          ) : recordings.length > 0 ? (
+            playRecordings(recordings)
+          ) : (
+            <Text style={styles.text}>No recordings</Text>
+          )}
+        </View>
       )}
     </View>
   );
