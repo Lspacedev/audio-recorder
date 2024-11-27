@@ -25,7 +25,9 @@ import {
   MimeTypes,
 } from "@robinbobin/react-native-google-drive-api-wrapper";
 import RNFS from "react-native-fs";
-
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
+import EvilIcons from "@expo/vector-icons/EvilIcons";
 const Recordings = () => {
   const [recordings, setRecordings] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -35,6 +37,7 @@ const Recordings = () => {
 
   const [updatedRecs, setUpdatedRecs] = useState([]);
   const [openForm, setOpenForm] = useState(false);
+  const [openMenu, setOpenMenu] = useState(false);
   const [name, setName] = useState("");
   const [curr, setCurr] = useState("");
 
@@ -112,6 +115,72 @@ const Recordings = () => {
         <View key={i}>
           <View key={i} style={styles.recordingContainer}>
             <Modal
+              style={styles.menuModal}
+              animationType="fade"
+              transparent={true}
+              visible={openMenu && modalId === record.id}
+              onRequestClose={() => {
+                setOpenMenu(false);
+              }}
+            >
+              <View style={styles.menu}>
+                <Text
+                  onPress={() => {
+                    setOpenMenu(false);
+                  }}
+                  style={{
+                    padding: 0,
+                    margin: 0,
+                    textAlign: "right",
+                  }}
+                >
+                  <EvilIcons name="close" size={24} color="black" />
+                </Text>
+                <Pressable
+                  style={styles.menuItem}
+                  onPress={() => backupAudio(record)}
+                >
+                  <MaterialIcons name="backup" size={24} color="black" />
+
+                  <Text>Backup</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.menuItem}
+                  onPress={() => {
+                    setModalId(record.id);
+                    setOpenForm(true);
+                  }}
+                >
+                  <MaterialIcons
+                    name="drive-file-rename-outline"
+                    size={24}
+                    color="black"
+                  />
+                  <Text>Rename</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.menuItem}
+                  onPress={() => deleteRecording(record.id, record.albumId)}
+                >
+                  <MaterialIcons name="delete" size={24} />
+                  <Text>Delete</Text>
+                </Pressable>
+                {/* <Button
+                  title="Delete"
+                  onPress={() => deleteRecording(record.id, record.albumId)}
+                />
+
+                <Button
+                  title="Rename"
+                  onPress={() => {
+                    setModalId(record.id);
+                    setOpenForm(true);
+                  }}
+                />
+                <Button title="Backup" onPress={() => backupAudio(record)} /> */}
+              </View>
+            </Modal>
+            <Modal
               style={styles.modal}
               animationType="slide"
               transparent={true}
@@ -125,22 +194,39 @@ const Recordings = () => {
                 id={record.id}
               />
             </Modal>
+            <View style={styles.playTitleContainer}>
+              {!playing ? (
+                <Button
+                  style={{ flex: 1 }}
+                  title="Play"
+                  onPress={() => playSound(record.uri, record.duration)}
+                />
+              ) : curr === record.uri ? (
+                <Button
+                  style={{ flex: 1 }}
+                  title="Pause"
+                  onPress={() => pauseSound()}
+                />
+              ) : (
+                <Button
+                  style={{ flex: 1 }}
+                  title="Play"
+                  onPress={() => playSound(record.uri, record.duration)}
+                />
+              )}
 
-            <View style={styles.recordingTitle}>
-              <Text>
-                {record.filename.length > 20
-                  ? record.filename.slice(0, 15) + "..."
-                  : record.filename}{" "}
-              </Text>
-              <Text>{formatDuration(record.duration)}</Text>
+              <View style={styles.recordingTitle}>
+                <Text>
+                  {record.filename.length > 20
+                    ? record.filename.slice(0, 15) + "..."
+                    : record.filename}{" "}
+                </Text>
+                <Text>{formatDuration(record.duration)}</Text>
+              </View>
             </View>
             <View style={styles.recordBtns}>
               {/* <Text>{JSON.stringify(playing)}</Text> */}
 
-              <Button
-                title="Delete"
-                onPress={() => deleteRecording(record.id, record.albumId)}
-              />
               {/* {playing && curr === record.uri ? (
                 <Button title="Pause" onPress={() => pauseSound()} />
               ) : (
@@ -149,27 +235,21 @@ const Recordings = () => {
                   onPress={() => playSound(record.uri, record.duration)}
                 />
               )} */}
-              {!playing ? (
-                <Button
-                  title="Play"
-                  onPress={() => playSound(record.uri, record.duration)}
-                />
-              ) : curr === record.uri ? (
-                <Button title="Pause" onPress={() => pauseSound()} />
-              ) : (
-                <Button
-                  title="Play"
-                  onPress={() => playSound(record.uri, record.duration)}
-                />
-              )}
-              <Button
+
+              {/* <Button
                 title="Rename"
                 onPress={() => {
                   setModalId(record.id);
                   setOpenForm(true);
                 }}
+              /> */}
+              <Button
+                title="Menu"
+                onPress={() => {
+                  setModalId(record.id);
+                  setOpenMenu(!openMenu);
+                }}
               />
-              <Button title="Backup" onPress={() => backupAudio(record)} />
             </View>
           </View>
 
@@ -382,6 +462,7 @@ const styles = StyleSheet.create({
     gap: 15,
     padding: 5,
     paddingVertical: 25,
+    marginTop: 20,
   },
   recordingsTitle: {
     color: "white",
@@ -399,16 +480,17 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
   recordingContainer: {
+    padding: 10,
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-
-    padding: 15,
-    paddingHorizontal: 5,
+  },
+  playTitleContainer: {
+    flex: 4,
+    flexDirection: "row",
   },
   recordingTitle: {
     color: "black",
-    flex: 1,
+    flex: 4,
   },
   recordingBtn: {
     width: 50,
@@ -423,7 +505,7 @@ const styles = StyleSheet.create({
     color: "#C7D6D5",
   },
   modal: {
-    felx: 1,
+    flex: 1,
     backgroundColor: "blue",
   },
   rename: {
@@ -434,12 +516,38 @@ const styles = StyleSheet.create({
     borderWidth: 0.8,
   },
   recordBtns: {
-    flex: 2,
+    flex: 1,
     flexDirection: "row",
     gap: 2,
   },
   text: {
     textAlign: "center",
     margin: 20,
+  },
+  menuModal: {
+    flex: 1,
+
+    backgroundColor: "blue",
+  },
+  menu: {
+    position: "absolute",
+    right: 0,
+    width: 200,
+    height: 150,
+    backgroundColor: "white",
+    borderRadius: 5,
+    padding: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  menuItem: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    gap: 15,
+    alignItems: "center",
+    padding: 5,
   },
 });

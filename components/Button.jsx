@@ -3,6 +3,7 @@ import React from "react";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 const Button = ({ title, onPress }) => {
   return (
     <Pressable style={styles.parent} onPress={onPress}>
@@ -19,7 +20,8 @@ const Button = ({ title, onPress }) => {
           title === "Pause" ||
           title === "Delete" ||
           title === "Rename" ||
-          title === "Backup") && (
+          title === "Backup" ||
+          title === "Menu") && (
           <Text>
             {title === "Play" ? (
               <Entypo
@@ -29,22 +31,10 @@ const Button = ({ title, onPress }) => {
               />
             ) : title === "Pause" ? (
               <FontAwesome name="pause" size={24} style={styles.playbackBtn} />
-            ) : title === "Delete" ? (
-              <MaterialIcons
-                name="delete"
-                size={24}
-                style={styles.playbackBtn}
-              />
-            ) : title === "Rename" ? (
-              <MaterialIcons
-                name="drive-file-rename-outline"
-                size={24}
-                color="black"
-              />
-            ) : title === "Backup" ? (
-              <MaterialIcons name="backup" size={24} color="black" />
+            ) : title === "Menu" ? (
+              <SimpleLineIcons name="options" size={24} color="black" />
             ) : (
-              { title }
+              title
             )}
           </Text>
         )}
@@ -71,9 +61,6 @@ const styles = StyleSheet.create({
     backgroundColor: "whitesmoke",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#bbb",
-    borderRadius: 50,
   },
   start: {
     width: 20,
