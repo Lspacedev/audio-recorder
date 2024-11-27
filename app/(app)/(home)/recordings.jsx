@@ -89,7 +89,7 @@ const Recordings = () => {
           console.log("Done playing");
           await sound.current.unloadAsync();
           setPlaying(false);
-
+          setPaused(false);
           setCurr("");
           setPos(0);
         } else {
@@ -291,6 +291,10 @@ const Recordings = () => {
   };
   const playSound = async (uri, duration) => {
     try {
+      if (paused && curr !== uri) {
+        console.log("song is paused");
+        return;
+      }
       const result = await sound.current.getStatusAsync();
       if (result.isLoaded === false) {
         setPlaying(true);
@@ -325,6 +329,7 @@ const Recordings = () => {
         if (result.isPlaying === true) {
           await sound.current.pauseAsync();
           setPlaying(false);
+          setPaused(true);
         }
       }
     } catch (error) {
@@ -389,7 +394,7 @@ const Recordings = () => {
       const res = await signIn();
       const gdrive = new GDrive();
       gdrive.accessToken = res;
-      gdrive.fetchTimeout = 30000;
+      gdrive.fetchTimeout = 3000000;
 
       RNFS.readFile(record.uri, "base64").then(async (data) => {
         // binary data

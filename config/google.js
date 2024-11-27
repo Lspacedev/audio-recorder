@@ -6,6 +6,7 @@ import {
 export const configureGoogleSignIn = () => {
   GoogleSignin.configure({
     webClientId: "",
+    androidId: "",
     scopes: [
       "https://www.googleapis.com/auth/drive",
       "https://www.googleapis.com/auth/drive.file",
