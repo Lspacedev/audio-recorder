@@ -5,6 +5,7 @@ import {
   useState,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
 type AuthContextType = {
   signIn: (username: string, password: string) => void;
@@ -58,6 +59,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
               if (user[0].password === password) {
                 setSession("logged-in");
                 await AsyncStorage.setItem("curr", JSON.stringify(user[0]));
+                router.replace("/home");
               }
             }
           }

@@ -1,17 +1,30 @@
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import React from "react";
-
+import { useState } from "react";
 const CustomInput = ({ name, onChange, error, onBlur }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <View style={styles.inputContainer}>
       <Text style={styles.label}>{name}</Text>
-      <TextInput
-        style={[styles.input, error && { borderColor: "#B9382C" }]}
-        placeholder={name}
-        placeholderTextColor={"#717171"}
-        onChangeText={(text) => onChange(text)}
-        onBlur={onBlur}
-      />
+      {name === "Password" ? (
+        <TextInput
+          secureTextEntry={!showPassword}
+          style={[styles.input, error && { borderColor: "#B9382C" }]}
+          placeholder={name}
+          placeholderTextColor={"#717171"}
+          onChangeText={(text) => onChange(text)}
+          onBlur={onBlur}
+        />
+      ) : (
+        <TextInput
+          style={[styles.input, error && { borderColor: "#B9382C" }]}
+          placeholder={name}
+          placeholderTextColor={"#717171"}
+          onChangeText={(text) => onChange(text)}
+          onBlur={onBlur}
+        />
+      )}
       {error && typeof error === "string" && (
         <Text style={styles.error}>{error}</Text>
       )}

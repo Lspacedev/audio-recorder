@@ -46,7 +46,6 @@ export default function SignIn() {
               signIn(username, password);
               // Navigate after signing in. You may want to tweak this to ensure sign-in is
               // successful before navigating.
-              router.replace("/home");
             }}
           >
             Sign In

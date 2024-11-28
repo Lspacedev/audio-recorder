@@ -7,6 +7,7 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
+  TouchableWithoutFeedback,
 } from "react-native";
 import React from "react";
 import { useState, useEffect, useRef } from "react";
@@ -123,49 +124,58 @@ const Recordings = () => {
                 setOpenMenu(false);
               }}
             >
-              <View style={styles.menu}>
-                <Text
-                  onPress={() => {
-                    setOpenMenu(false);
-                  }}
-                  style={{
-                    padding: 0,
-                    margin: 0,
-                    textAlign: "right",
-                  }}
-                >
-                  <EvilIcons name="close" size={24} color="black" />
-                </Text>
-                <Pressable
-                  style={styles.menuItem}
-                  onPress={() => backupAudio(record)}
-                >
-                  <MaterialIcons name="backup" size={24} color="black" />
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  setOpenMenu(false);
+                }}
+              >
+                <View style={{ backgroundColor: "transparent", flex: 1 }}>
+                  <TouchableWithoutFeedback onPress={() => {}}>
+                    <View style={styles.menu}>
+                      <Text
+                        onPress={() => {
+                          setOpenMenu(false);
+                        }}
+                        style={{
+                          padding: 0,
+                          margin: 0,
+                          textAlign: "right",
+                        }}
+                      >
+                        <EvilIcons name="close" size={24} color="black" />
+                      </Text>
+                      <Pressable
+                        style={styles.menuItem}
+                        onPress={() => backupAudio(record)}
+                      >
+                        <MaterialIcons name="backup" size={24} color="black" />
 
-                  <Text>Backup</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.menuItem}
-                  onPress={() => {
-                    setModalId(record.id);
-                    setOpenForm(true);
-                  }}
-                >
-                  <MaterialIcons
-                    name="drive-file-rename-outline"
-                    size={24}
-                    color="black"
-                  />
-                  <Text>Rename</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.menuItem}
-                  onPress={() => deleteRecording(record.id, record.albumId)}
-                >
-                  <MaterialIcons name="delete" size={24} />
-                  <Text>Delete</Text>
-                </Pressable>
-                {/* <Button
+                        <Text>Backup</Text>
+                      </Pressable>
+                      <Pressable
+                        style={styles.menuItem}
+                        onPress={() => {
+                          setModalId(record.id);
+                          setOpenForm(true);
+                        }}
+                      >
+                        <MaterialIcons
+                          name="drive-file-rename-outline"
+                          size={24}
+                          color="black"
+                        />
+                        <Text>Rename</Text>
+                      </Pressable>
+                      <Pressable
+                        style={styles.menuItem}
+                        onPress={() =>
+                          deleteRecording(record.id, record.albumId)
+                        }
+                      >
+                        <MaterialIcons name="delete" size={24} />
+                        <Text>Delete</Text>
+                      </Pressable>
+                      {/* <Button
                   title="Delete"
                   onPress={() => deleteRecording(record.id, record.albumId)}
                 />
@@ -178,7 +188,10 @@ const Recordings = () => {
                   }}
                 />
                 <Button title="Backup" onPress={() => backupAudio(record)} /> */}
-              </View>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
             </Modal>
             <Modal
               style={styles.modal}
@@ -316,7 +329,12 @@ const Recordings = () => {
   };
   const deleteRecording = async (assetId, albumId) => {
     try {
+      await sound.current.unloadAsync();
       await MediaLibrary.removeAssetsFromAlbumAsync(assetId, albumId);
+      setPlaying(false);
+      setPaused(false);
+      setCurr("");
+      setPos(0);
       getAllRecordings();
     } catch (error) {
       console.log(error);
@@ -344,6 +362,7 @@ const Recordings = () => {
       : `${Math.floor(minutes)}:${seconds}`;
   };
   const getAllRecordings = async () => {
+    setLoading(true);
     let album = await MediaLibrary.getAlbumAsync("Audio Recorder");
     if (album !== null) {
       const media = await MediaLibrary.getAssetsAsync({
@@ -351,8 +370,10 @@ const Recordings = () => {
         mediaType: MediaLibrary.MediaType.audio,
         first: 40,
       });
+
       const data = await getData();
       updateRecordingNames(JSON.parse(data), media.assets);
+      setLoading(false);
     } else {
       setRecordings([]);
     }
@@ -421,6 +442,7 @@ const Recordings = () => {
       Alert.alert("An error occured while backing up");
     }
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.recordingsNav}>

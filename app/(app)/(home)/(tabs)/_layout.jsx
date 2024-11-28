@@ -21,7 +21,7 @@ export default function TabLayout() {
         options={{
           headerShown: false,
           tabBarIcon: () => {
-            return <AntDesign name="home" size={24} color="#F7F0F0" />;
+            return <AntDesign name="home" size={24} color="#C7D6D5" />;
           },
         }}
       />
@@ -37,7 +37,7 @@ export default function TabLayout() {
           },
           tabBarIcon: () => {
             return (
-              <Ionicons name="person-circle-sharp" size={24} color="#F7F0F0" />
+              <Ionicons name="person-circle-sharp" size={24} color="#C7D6D5" />
             );
           },
 
