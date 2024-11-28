@@ -17,8 +17,14 @@ import { router } from "expo-router";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import * as MediaLibrary from "expo-media-library";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useIsFocused } from "@react-navigation/native";
 
 export default function Recorder() {
+  const isFocused = useIsFocused();
+
+  const [theme, setTheme] = useState("Dark");
+
   const [recording, setRecording] = useState();
 
   const [recordingStatus, setRecordingStatus] = useState("idle");
@@ -28,7 +34,12 @@ export default function Recorder() {
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
-
+  useEffect(() => {
+    isFocused &&
+      (async () => {
+        setTheme(JSON.parse(await AsyncStorage.getItem("theme")));
+      })();
+  }, [isFocused]);
   useEffect(() => {
     let timer = null;
     let s = 0;
@@ -114,26 +125,69 @@ export default function Recorder() {
 
     console.log("Recording stopped and stored at", uri);
   }
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        theme === "Light"
+          ? { backgroundColor: "white" }
+          : { backgroundColor: "#0C0910" },
+        ,
+      ]}
+    >
       <ScrollView contentContainerStyle={styles.scrollView}>
-        <Text style={styles.title}>Audio Recorder</Text>
+        <Text
+          style={[
+            styles.title,
+            theme === "Light" ? { color: "#0C0910" } : { color: "#C7D6D5" },
+            ,
+          ]}
+        >
+          Audio Recorder
+        </Text>
         <View style={styles.micIcon}>
-          <FontAwesome name="microphone" size={50} color="white" />
+          <FontAwesome
+            name="microphone"
+            size={50}
+            color={theme === "Light" ? "#0C0910" : "#C7D6D5"}
+          />
         </View>
-        <Text style={styles.title}>
+        <Text
+          style={[
+            styles.time,
+            theme === "Light" ? { color: "#0C0910" } : { color: "#C7D6D5" },
+            ,
+          ]}
+        >
           {minutes < 10 ? "0" + minutes : minutes} :
           {seconds < 10 ? " 0" + seconds : seconds}
         </Text>
 
         <View style={styles.buttons}>
-          <Pressable onPress={() => setRecordingStatus("stopped")}>
-            <Feather name="settings" size={24} color="#C7D6D5" />
+          <Pressable
+            onPress={() => {
+              router.push("settings");
+            }}
+          >
+            <Feather
+              name="settings"
+              size={24}
+              color={theme === "Light" ? "#0C0910" : "#C7D6D5"}
+            />
           </Pressable>
-          <View style={styles.recordingBtn}>
+          <View
+            style={[
+              styles.recordingBtn,
+              theme === "Light"
+                ? { borderWidth: 1, borderColor: "whitesmoke" }
+                : { borderWidth: 1, borderColor: "white" },
+            ]}
+          >
             <Button
               title={recording ? "Stop" : "Start"}
               onPress={recording ? stopRecording : startRecording}
+              theme={theme}
             />
           </View>
           <Pressable
@@ -144,7 +198,11 @@ export default function Recorder() {
               router.push("recordings");
             }}
           >
-            <Feather name="list" size={24} color="#C7D6D5" />
+            <Feather
+              name="list"
+              size={24}
+              color={theme === "Light" ? "#0C0910" : "#C7D6D5"}
+            />
           </Pressable>
         </View>
       </ScrollView>
@@ -156,7 +214,6 @@ export default function Recorder() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0C0910",
   },
   scrollView: {
     flex: 1,
@@ -164,9 +221,13 @@ const styles = StyleSheet.create({
     paddingVertical: 100,
   },
   title: {
-    color: "#C7D6D5",
     textAlign: "center",
     fontSize: 22,
+  },
+  time: {
+    textAlign: "center",
+    fontSize: 50,
+    fontWeight: 200,
   },
   recordingContainer: {
     flexDirection: "row",

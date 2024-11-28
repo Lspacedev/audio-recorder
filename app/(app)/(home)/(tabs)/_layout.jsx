@@ -1,14 +1,26 @@
 import { Tabs } from "expo-router";
 import { Text } from "react-native";
+import { useState, useEffect } from "react";
 import { useSession } from "@/ctx";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 export default function TabLayout() {
   const { signOut } = useSession();
-
+  const [theme, setTheme] = useState("Dark");
+  useEffect(() => {
+    (async () => {
+      setTheme(JSON.parse(await AsyncStorage.getItem("theme")));
+    })();
+  }, []);
   return (
     <Tabs
       screenOptions={{
+        tabBarStyle: {
+          borderTopWidth: 0,
+          borderBottomWidth: 0,
+        },
         tabBarLabelStyle: {
           color: "#BDBDBD",
         },

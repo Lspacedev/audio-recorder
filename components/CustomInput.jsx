@@ -7,7 +7,7 @@ const CustomInput = ({ name, onChange, error, onBlur }) => {
   return (
     <View style={styles.inputContainer}>
       <Text style={styles.label}>{name}</Text>
-      {name === "Password" ? (
+      {name === "Password" || name === "Confirm Password" ? (
         <TextInput
           secureTextEntry={!showPassword}
           style={[styles.input, error && { borderColor: "#B9382C" }]}

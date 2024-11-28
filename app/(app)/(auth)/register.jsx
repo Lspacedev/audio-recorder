@@ -1,18 +1,4 @@
-import { Stack } from "expo-router";
-import {
-  ScrollView,
-  FlatList,
-  View,
-  Text,
-  TextInput,
-  Image,
-  ActivityIndicator,
-  Pressable,
-  Alert,
-  ToastAndroid,
-  KeyboardAvoidingView,
-  StyleSheet,
-} from "react-native";
+import { ScrollView, View, Text, Pressable, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import * as NavigationBar from "expo-navigation-bar";
@@ -21,6 +7,7 @@ import CustomInput from "@/components/CustomInput";
 import { validateInput } from "../../../utils/input-validation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 
 export default function Registration() {
   const [userName, setUsername] = useState("");
@@ -47,6 +34,7 @@ export default function Registration() {
       let arr = [];
       arr.push({ userName, password });
       await AsyncStorage.setItem("reg", JSON.stringify(arr));
+      router.push("sign-in");
     } else {
       const user = data.filter((account) => account.userName === data.userName);
 
@@ -55,6 +43,7 @@ export default function Registration() {
       } else {
         data.push({ userName, password });
         await AsyncStorage.setItem("reg", JSON.stringify(data));
+        router.push("sign-in");
       }
     }
   };

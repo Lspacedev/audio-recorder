@@ -2,12 +2,20 @@ import { Text, TextInput, View, Pressable, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { useIsFocused } from "@react-navigation/native";
 export default function Profile() {
+  const isFocused = useIsFocused();
+  const [theme, setTheme] = useState("Dark");
   const [user, setUser] = useState(null);
   const [userName, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [edit, setEdit] = useState(false);
+  useEffect(() => {
+    isFocused &&
+      (async () => {
+        setTheme(JSON.parse(await AsyncStorage.getItem("theme")));
+      })();
+  }, [isFocused]);
   useEffect(() => {
     getData("curr");
   }, []);
@@ -16,7 +24,6 @@ export default function Profile() {
       const value = await AsyncStorage.getItem(storageKey);
 
       let data = value !== null ? JSON.parse(value) : value;
-      console.log({ data });
       setUser(data);
     } catch (error) {
       // error reading value
@@ -34,17 +41,40 @@ export default function Profile() {
     }
     await AsyncStorage.setItem("reg", JSON.stringify(data));
   };
-  console.log(edit);
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        theme === "Light"
+          ? { backgroundColor: "white" }
+          : { backgroundColor: "#0C0910" },
+        ,
+      ]}
+    >
       {edit && (
-        <Text style={styles.text} onPress={() => setEdit(false)}>
+        <Text
+          style={[
+            styles.text,
+            theme === "Light" ? { color: "#0C0910" } : { color: "#F7F0F0" },
+            ,
+          ]}
+          onPress={() => setEdit(false)}
+        >
           x
         </Text>
       )}
       {user !== null &&
         (!edit ? (
-          <Text style={styles.text}>Username: {user.userName}</Text>
+          <Text
+            style={[
+              styles.text,
+              theme === "Light" ? { color: "#0C0910" } : { color: "#F7F0F0" },
+              ,
+            ]}
+          >
+            Username: {user.userName}
+          </Text>
         ) : (
           <TextInput
             style={styles.input}
@@ -55,7 +85,15 @@ export default function Profile() {
         ))}
       {user !== null &&
         (!edit ? (
-          <Text style={styles.text}>Password: {user.password}</Text>
+          <Text
+            style={[
+              styles.text,
+              theme === "Light" ? { color: "#0C0910" } : { color: "#F7F0F0" },
+              ,
+            ]}
+          >
+            Password: {user.password}
+          </Text>
         ) : (
           <TextInput
             style={styles.input}
@@ -86,7 +124,6 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    color: "#F7F0F0",
     textAlign: "center",
     textTransform: "uppercase",
     padding: 15,

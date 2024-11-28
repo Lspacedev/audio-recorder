@@ -4,9 +4,9 @@ import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-const Button = ({ title, onPress }) => {
+const Button = ({ title, onPress, theme }) => {
   return (
-    <Pressable style={styles.parent} onPress={onPress}>
+    <Pressable style={[styles.parent]} onPress={onPress}>
       <View
         style={[
           title === "Start"
@@ -14,6 +14,8 @@ const Button = ({ title, onPress }) => {
             : title === "Stop"
               ? styles.stop
               : styles.default,
+
+          ,
         ]}
       >
         {(title === "Play" ||
