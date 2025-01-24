@@ -331,6 +331,7 @@ const Recordings = () => {
       setLoading(false);
     } else {
       setRecordings([]);
+      setLoading(false);
     }
   };
   const renameFile = (id, newName) => {
