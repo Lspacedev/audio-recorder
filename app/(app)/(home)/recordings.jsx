@@ -20,7 +20,12 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Slider from "@react-native-community/slider";
-
+import { configureGoogleSignIn, signIn } from "@/config/google";
+import {
+  GDrive,
+  MimeTypes,
+} from "@robinbobin/react-native-google-drive-api-wrapper";
+import RNFS from "react-native-fs";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 const Recordings = () => {
@@ -66,6 +71,8 @@ const Recordings = () => {
   };
 
   useEffect(() => {
+    // configureGoogleSignIn();
+
     getData();
   }, []);
   useEffect(() => {
@@ -137,7 +144,14 @@ const Recordings = () => {
                       >
                         <EvilIcons name="close" size={24} color="black" />
                       </Text>
+                      <Pressable
+                        style={styles.menuItem}
+                        onPress={() => backupAudio(record)}
+                      >
+                        <MaterialIcons name="backup" size={24} color="black" />
 
+                        <Text>Backup</Text>
+                      </Pressable>
                       <Pressable
                         style={styles.menuItem}
                         onPress={() => {
@@ -362,6 +376,39 @@ const Recordings = () => {
       setRecordings(recordingsCopy);
     } else {
       setRecordings(recordingsArr);
+    }
+  };
+  const backupAudio = async (record) => {
+    try {
+      setLoading(true);
+      const res = await signIn();
+      const gdrive = new GDrive();
+      gdrive.accessToken = res;
+      gdrive.fetchTimeout = 3000000;
+
+      RNFS.readFile(record.uri, "base64").then(async (data) => {
+        // binary data
+        const id = (
+          await gdrive.files
+            .newMultipartUploader()
+            .setIsBase64(true)
+            .setData(data, "audio/mp4")
+            .setRequestBody({
+              name: record.filename,
+            })
+            .execute()
+        ).id;
+        if (id !== "") {
+          setLoading(false);
+
+          Alert.alert(`Record has been successfully backed up.`);
+        }
+      });
+    } catch (error) {
+      setLoading(false);
+
+      console.log(error);
+      Alert.alert("An error occured while backing up");
     }
   };
 

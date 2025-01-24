@@ -147,11 +147,15 @@ export default function Recorder() {
           Audio Recorder
         </Text>
         <View style={styles.micIcon}>
-          <FontAwesome
-            name="microphone"
-            size={50}
-            color={theme === "Light" ? "#0C0910" : "#C7D6D5"}
-          />
+          <View style={styles.iconBorder}>
+            <View style={styles.innerIconBorder}>
+              <FontAwesome
+                name="microphone"
+                size={50}
+                color={theme === "Light" ? "#0C0910" : "#C7D6D5"}
+              />
+            </View>
+          </View>
         </View>
         <Text
           style={[
@@ -233,7 +237,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-evenly",
     alignItems: "center",
-    backgroundColor: "#333138",
+    backgroundColor: "#47454b",
     margin: 15,
     padding: 5,
     paddingHorizontal: 15,
@@ -260,7 +264,28 @@ const styles = StyleSheet.create({
     color: "#C7D6D5",
   },
   micIcon: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  iconBorder: {
+    width: 200,
+    height: 200,
+    borderWidth: 2,
+    borderColor: "#141316",
+    borderRadius: 100,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#19181c",
+  },
+  innerIconBorder: {
+    width: 150,
+    height: 150,
+    borderWidth: 2,
+    borderColor: "#0f0e10",
+    borderRadius: 75,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#141316",
   },
 });
