@@ -2,11 +2,12 @@ import {
   GoogleSignin,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
+import Constants from "expo-constants";
 
 export const configureGoogleSignIn = () => {
   GoogleSignin.configure({
-    webClientId: process.env.EXPO_WEB_CLIENT_KEY,
-    androidId: process.env.EXPO_ANDROID_CLIENT_KEY,
+    webClientId: Constants.expoConfig?.extra?.WEB_CLIENT_KEY,
+    androidId: Constants.expoConfig?.extra?.ANDROID_CLIENT_KEY,
     scopes: [
       "https://www.googleapis.com/auth/drive",
       "https://www.googleapis.com/auth/drive.file",
