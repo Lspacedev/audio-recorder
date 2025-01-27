@@ -88,7 +88,7 @@ const Recordings = () => {
   );
 
   useEffect(() => {
-    //configureGoogleSignIn();
+    configureGoogleSignIn();
 
     getData();
   }, []);
