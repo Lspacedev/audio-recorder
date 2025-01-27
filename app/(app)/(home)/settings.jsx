@@ -18,7 +18,14 @@ export default function Settings() {
   }, [theme]);
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 15, paddingVertical: 5 }}>
+    <View
+      style={{
+        flex: 1,
+        paddingHorizontal: 15,
+        paddingVertical: 5,
+        backgroundColor: "#e6e6e7",
+      }}
+    >
       <View>
         <RadioGroup
           groupName={"Theme"}

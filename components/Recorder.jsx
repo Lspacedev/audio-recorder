@@ -6,14 +6,15 @@ import {
   Image,
   Pressable,
   Alert,
+  TouchableOpacity,
   StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Audio } from "expo-av";
 import Button from "./Button";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import * as MediaLibrary from "expo-media-library";
@@ -23,7 +24,7 @@ import { useIsFocused } from "@react-navigation/native";
 export default function Recorder() {
   const isFocused = useIsFocused();
 
-  const [theme, setTheme] = useState("Dark");
+  const [theme, setTheme] = useState("");
 
   const [recording, setRecording] = useState();
 
@@ -34,18 +35,23 @@ export default function Recorder() {
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
-  useEffect(() => {
-    isFocused &&
+  useFocusEffect(
+    useCallback(() => {
       (async () => {
-        setTheme(JSON.parse(await AsyncStorage.getItem("theme")));
+        const saved = await AsyncStorage.getItem("theme");
+        if (saved !== null) {
+          setTheme(JSON.parse(saved));
+        } else {
+          setTheme("Dark");
+        }
       })();
-  }, [isFocused]);
+    }, [])
+  );
   useEffect(() => {
     let timer = null;
     let s = 0;
     let m = 0;
     let h = 0;
-    console.log(recordingStatus);
 
     if (recordingStatus === "recording") {
       timer = setInterval(() => {
@@ -125,7 +131,9 @@ export default function Recorder() {
 
     console.log("Recording stopped and stored at", uri);
   }
-
+  if (theme === "") {
+    return <View style={{ flex: 1 }}></View>;
+  }
   return (
     <SafeAreaView
       style={[
@@ -136,19 +144,33 @@ export default function Recorder() {
         ,
       ]}
     >
+      <Text
+        style={[
+          styles.title,
+          theme === "Light" ? { color: "#0C0910" } : { color: "#C7D6D5" },
+          ,
+        ]}
+      >
+        Audio Recorder
+      </Text>
       <ScrollView contentContainerStyle={styles.scrollView}>
-        <Text
-          style={[
-            styles.title,
-            theme === "Light" ? { color: "#0C0910" } : { color: "#C7D6D5" },
-            ,
-          ]}
-        >
-          Audio Recorder
-        </Text>
         <View style={styles.micIcon}>
-          <View style={styles.iconBorder}>
-            <View style={styles.innerIconBorder}>
+          <View
+            style={[
+              styles.iconBorder,
+              theme === "Light"
+                ? { backgroundColor: "#e6e6e7", borderColor: "#cecdcf" }
+                : { backgroundColor: "#19181c", borderColor: "#141316" },
+            ]}
+          >
+            <View
+              style={[
+                styles.innerIconBorder,
+                theme === "Light"
+                  ? { backgroundColor: "whitesmoke", borderColor: "#cecdcf" }
+                  : { backgroundColor: "#141316", borderColor: "#0f0e10" },
+              ]}
+            >
               <FontAwesome
                 name="microphone"
                 size={50}
@@ -167,19 +189,19 @@ export default function Recorder() {
           {minutes < 10 ? "0" + minutes : minutes} :
           {seconds < 10 ? " 0" + seconds : seconds}
         </Text>
-
         <View style={styles.buttons}>
-          <Pressable
+          <TouchableOpacity
             onPress={() => {
               router.push("settings");
             }}
+            style={{ padding: 15 }}
           >
             <Feather
               name="settings"
               size={24}
               color={theme === "Light" ? "#0C0910" : "#C7D6D5"}
             />
-          </Pressable>
+          </TouchableOpacity>
           <View
             style={[
               styles.recordingBtn,
@@ -194,20 +216,21 @@ export default function Recorder() {
               theme={theme}
             />
           </View>
-          <Pressable
+          <TouchableOpacity
             onPress={async () => {
               if (permResponse.status !== "granted") {
                 await requestPerm();
               }
               router.push("recordings");
             }}
+            style={{ padding: 15 }}
           >
             <Feather
               name="list"
               size={24}
               color={theme === "Light" ? "#0C0910" : "#C7D6D5"}
             />
-          </Pressable>
+          </TouchableOpacity>
         </View>
       </ScrollView>
       <StatusBar backgroundColor="#010709" />
@@ -222,15 +245,16 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     justifyContent: "space-between",
-    paddingVertical: 100,
+    paddingVertical: 50,
   },
   title: {
     textAlign: "center",
-    fontSize: 22,
+    fontSize: 20,
+    marginVertical: 15,
   },
   time: {
     textAlign: "center",
-    fontSize: 50,
+    fontSize: 40,
     fontWeight: 200,
   },
   recordingContainer: {
@@ -248,17 +272,19 @@ const styles = StyleSheet.create({
   },
   buttons: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "center",
     alignItems: "center",
+    gap: 50,
+    marginVertical: 35,
   },
   recordingBtn: {
-    width: 50,
-    height: 50,
+    width: 70,
+    height: 70,
     borderRadius: 150,
     alignSelf: "center",
     justifyContent: "center",
     alignContent: "center",
-    backgroundColor: "whitesmoke",
+    backgroundColor: "#e6e6e7",
   },
   navText: {
     color: "#C7D6D5",
@@ -272,20 +298,17 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderWidth: 2,
-    borderColor: "#141316",
     borderRadius: 100,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#19181c",
   },
   innerIconBorder: {
     width: 150,
     height: 150,
     borderWidth: 2,
-    borderColor: "#0f0e10",
+
     borderRadius: 75,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#141316",
   },
 });

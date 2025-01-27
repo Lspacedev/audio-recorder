@@ -11,7 +11,7 @@ const RadioButton = ({ label, value }) => {
       <View
         style={{
           borderWidth: 2,
-          borderColor: selectedValue === value ? "#306A68" : "#BDBDBD",
+          borderColor: selectedValue === value ? "#242127" : "#858487",
           borderRadius: 10,
           width: 20,
           height: 20,
@@ -22,7 +22,7 @@ const RadioButton = ({ label, value }) => {
         {selectedValue === value && (
           <View
             style={{
-              backgroundColor: "#306A68",
+              backgroundColor: "#242127",
               borderRadius: 5,
               height: 10,
               width: 10,
@@ -30,7 +30,7 @@ const RadioButton = ({ label, value }) => {
           ></View>
         )}
       </View>
-      <Text style={{ color: selectedValue === value ? "#306A68" : "#BDBDBD" }}>
+      <Text style={{ color: selectedValue === value ? "#242127" : "#858487" }}>
         {label}
       </Text>
     </Pressable>
@@ -44,7 +44,7 @@ const RadioGroup = ({
 }) => {
   return (
     <RadioContext.Provider value={{ selectedValue, setSelectedValue }}>
-      <Text style={{ color: "#BDBDBD" }}>{groupName}</Text>
+      <Text style={{ color: "#858487", marginVertical: 10 }}>{groupName}</Text>
       <View style={{ gap: 10 }}>{children}</View>
     </RadioContext.Provider>
   );

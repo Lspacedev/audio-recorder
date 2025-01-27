@@ -8,16 +8,17 @@ import {
   Alert,
   ActivityIndicator,
   TouchableWithoutFeedback,
+  TouchableOpacity,
 } from "react-native";
 import React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Audio } from "expo-av";
 import * as MediaLibrary from "expo-media-library";
 import Button from "@/components/Button";
 import SearchBar from "@/components/SearchBar";
 import Rename from "@/components/Rename";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Slider from "@react-native-community/slider";
 import { configureGoogleSignIn, signIn } from "@/config/google";
@@ -28,6 +29,8 @@ import {
 import RNFS from "react-native-fs";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
+import { useIsFocused } from "@react-navigation/native";
+
 const Recordings = () => {
   const [recordings, setRecordings] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -49,6 +52,8 @@ const Recordings = () => {
   const [modalId, setModalId] = useState("");
 
   const sound = useRef(new Audio.Sound());
+  const [theme, setTheme] = useState("");
+  const isFocused = useIsFocused();
 
   const storeData = async (key, value) => {
     try {
@@ -69,9 +74,21 @@ const Recordings = () => {
       console.error("Error fetching data", error);
     }
   };
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        const saved = await AsyncStorage.getItem("theme");
+        if (saved !== null) {
+          setTheme(JSON.parse(saved));
+        } else {
+          setTheme("Dark");
+        }
+      })();
+    }, [])
+  );
 
   useEffect(() => {
-    // configureGoogleSignIn();
+    //configureGoogleSignIn();
 
     getData();
   }, []);
@@ -144,15 +161,15 @@ const Recordings = () => {
                       >
                         <EvilIcons name="close" size={24} color="black" />
                       </Text>
-                      <Pressable
+                      <TouchableOpacity
                         style={styles.menuItem}
                         onPress={() => backupAudio(record)}
                       >
                         <MaterialIcons name="backup" size={24} color="black" />
 
                         <Text>Backup</Text>
-                      </Pressable>
-                      <Pressable
+                      </TouchableOpacity>
+                      <TouchableOpacity
                         style={styles.menuItem}
                         onPress={() => {
                           setModalId(record.id);
@@ -165,8 +182,8 @@ const Recordings = () => {
                           color="black"
                         />
                         <Text>Rename</Text>
-                      </Pressable>
-                      <Pressable
+                      </TouchableOpacity>
+                      <TouchableOpacity
                         style={styles.menuItem}
                         onPress={() =>
                           deleteRecording(record.id, record.albumId)
@@ -174,7 +191,7 @@ const Recordings = () => {
                       >
                         <MaterialIcons name="delete" size={24} />
                         <Text>Delete</Text>
-                      </Pressable>
+                      </TouchableOpacity>
                     </View>
                   </TouchableWithoutFeedback>
                 </View>
@@ -240,6 +257,8 @@ const Recordings = () => {
               style={{ width: "100%", height: 50 }}
               minimumValue={0}
               maximumValue={1}
+              minimumTrackTintColor="#242127"
+              thumbTintColor="#242127"
               value={pos}
               onChange={(value) => setPos(value)}
               onSlidingStart={async (value) => {
@@ -349,6 +368,10 @@ const Recordings = () => {
     }
   };
   const renameFile = (id, newName) => {
+    if (newName === "") {
+      Alert.alert("Name field cannot be empty");
+      return;
+    }
     const filteredFiles = updatedRecs.filter((file) => file.id === id);
     if (filteredFiles.length === 0) {
       setUpdatedRecs((prev) => [...prev, { id, name: newName }]);
@@ -411,24 +434,44 @@ const Recordings = () => {
       Alert.alert("An error occured while backing up");
     }
   };
-
+  if (theme === "") {
+    return <View></View>;
+  }
   return (
     <View style={styles.container}>
-      <View style={styles.recordingsNav}>
-        <Pressable
+      <View
+        style={[
+          styles.recordingsNav,
+          theme === "Light"
+            ? { backgroundColor: "#f5f5f5", color: "#0c0910" }
+            : { backgroundColor: "#0C0910", color: "white" },
+        ]}
+      >
+        <TouchableOpacity
           onPress={() => router.push("./", { relativeToDirectory: true })}
         >
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </Pressable>
+          <Ionicons
+            name="arrow-back"
+            size={24}
+            color={theme === "Light" ? "#0c0910" : "white"}
+          />
+        </TouchableOpacity>
 
-        <Text style={styles.recordingsTitle}>Recordings</Text>
+        <Text
+          style={[
+            styles.recordingsTitle,
+            theme === "Light" ? { color: "#0c0910" } : { color: "white" },
+          ]}
+        >
+          Recordings
+        </Text>
         <SearchBar name="Find" onChange={setSearchText} />
       </View>
       {loading ? (
         <View
           style={{ flex: 1, alignContent: "center", justifyContent: "center" }}
         >
-          <ActivityIndicator size="500" color="#0000ff" />
+          <ActivityIndicator size="500" color="#0c0910" />
         </View>
       ) : (
         <View>
@@ -449,10 +492,9 @@ export default Recordings;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "whitesmoke",
+    backgroundColor: "#e6e6e7",
   },
   recordingsNav: {
-    backgroundColor: "#0C0910",
     flexDirection: "row",
     alignItems: "center",
     gap: 15,
@@ -477,8 +519,11 @@ const styles = StyleSheet.create({
   },
   recordingContainer: {
     padding: 10,
+    margin: 5,
+    borderRadius: 5,
     flexDirection: "row",
     justifyContent: "space-between",
+    backgroundColor: "whitesmoke",
   },
   playTitleContainer: {
     flex: 4,
@@ -529,7 +574,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
     width: 200,
-    height: 150,
+    height: 200,
     backgroundColor: "white",
     borderRadius: 5,
     padding: 10,
@@ -538,6 +583,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
+    justifyContent: "space-evenly",
   },
   menuItem: {
     flexDirection: "row",
@@ -545,5 +591,6 @@ const styles = StyleSheet.create({
     gap: 15,
     alignItems: "center",
     padding: 5,
+    marginVertical: 5,
   },
 });

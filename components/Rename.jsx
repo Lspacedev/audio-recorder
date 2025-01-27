@@ -1,17 +1,29 @@
-import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import EvilIcons from "@expo/vector-icons/EvilIcons";
 
 export default function Rename({ setName, name, closeForm, renameFile, id }) {
   return (
     <View style={styles.modal}>
       <View style={styles.form}>
-        <Pressable
+        <TouchableOpacity
           style={styles.closeBtn}
           onPress={() => {
             closeForm(false);
           }}
         >
-          <Text style={styles.close}>x</Text>
-        </Pressable>
+          <EvilIcons
+            name="close"
+            size={24}
+            color="black"
+            style={styles.close}
+          />
+        </TouchableOpacity>
 
         <TextInput
           style={styles.input}
@@ -20,9 +32,12 @@ export default function Rename({ setName, name, closeForm, renameFile, id }) {
           onChangeText={(text) => setName(text)}
         />
 
-        <Pressable style={styles.button} onPress={() => renameFile(id, name)}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => renameFile(id, name)}
+        >
           <Text style={styles.buttonText}>Submit</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -56,14 +71,14 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#0C0910",
-    padding: 5,
+    padding: 10,
     paddingHorizontal: 50,
     width: "100%",
     marginTop: 10,
     borderRadius: 5,
   },
   buttonText: {
-    color: "#C7D6D5",
+    color: "whitesmoke",
     textAlign: "center",
     textTransform: "uppercase",
   },
@@ -90,7 +105,7 @@ const styles = StyleSheet.create({
     margin: 25,
     backgroundColor: "white",
     padding: 20,
-    borderRadius: 20,
+    borderRadius: 5,
     alignItems: "center",
   },
   imageUploadBtn: {
@@ -106,9 +121,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
   },
   close: {
-    color: "#BDBDBD",
     fontSize: 25,
-    margin: 0,
-    padding: 0,
+    marginBottom: 15,
   },
 });

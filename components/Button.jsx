@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React from "react";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -6,7 +6,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 const Button = ({ title, onPress, theme }) => {
   return (
-    <Pressable style={[styles.parent]} onPress={onPress}>
+    <TouchableOpacity style={[styles.parent]} onPress={onPress}>
       <View
         style={[
           title === "Start"
@@ -41,7 +41,7 @@ const Button = ({ title, onPress, theme }) => {
           </Text>
         )}
       </View>
-    </Pressable>
+    </TouchableOpacity>
   );
 };
 
@@ -65,16 +65,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   start: {
-    width: 20,
-    height: 20,
-    borderRadius: 20,
+    width: 30,
+    height: 30,
+    borderRadius: 50,
     justifyContent: "center",
     alignSelf: "center",
     backgroundColor: "#eb4034",
   },
   stop: {
-    width: 20,
-    height: 20,
+    width: 30,
+    height: 30,
     justifyContent: "center",
     alignSelf: "center",
     backgroundColor: "#bbb",
