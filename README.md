@@ -1,20 +1,44 @@
-# Welcome to your Expo app 👋
+# Audio Recorder App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A simple audio recorder app, where users can record and manage audio.
 
-## Get started
+## Prerequisites
 
-1. Install dependencies
+- React Native
+- Expo
 
-   ```bash
-   npm install
-   ```
+## Installation
 
-2. Start the app
+1. Clone the repository
 
-   ```bash
-    npx expo start
-   ```
+```bash
+git@github.com:Lspacedev/audio-recorder.git
+```
+
+2. Navigate to the project folder
+
+```bash
+cd audio-recorder
+```
+
+3.  Install all dependencies
+
+```bash
+npm install
+```
+
+4. Create an env file and add the following:
+
+```bash
+WEB_CLIENT_KEY="Google Drive web client key"
+ANDROID_CLIENT_KEY="Google Drive android client key"
+```
+
+5. Run the project
+
+```bash
+npx expo start
+```
 
 In the output, you'll find options to open the app in a
 
@@ -23,28 +47,28 @@ In the output, you'll find options to open the app in a
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Screenshot
 
-## Get a fresh project
+<!-- ![landing](public/images/screenshot.png)
+![landing](public/images/screenshot2.png) -->
 
-When you're ready, run:
+## Features
 
-```bash
-npm run reset-project
-```
+- Record audio.
+- Play audio.
+- Delete audio.
+- Rename audio.
+- Backup audio to Google Drive
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Usage
 
-## Learn more
+1. Open the app.
+2. Record audio.
+3. Find all your audios in the recordings tab.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Tech Stack / Tools
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- React Native
+- Expo MediaLibrary
+- Expo AV
+- AsyncStorage
