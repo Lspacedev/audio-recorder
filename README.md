@@ -49,8 +49,8 @@ In the output, you'll find options to open the app in a
 
 ## Screenshot
 
-![image1](public/images/screenshot.png)
-![image2](public/images/screenshot2.png)
+![image1](assets/images/screenshot.png)
+![image2](assets/images/screenshot2.png)
 
 ## Features
 
